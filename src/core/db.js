@@ -20,7 +20,7 @@ const ConnectDB = async () => {
         // Connect with the database
         await mongoose.connect(db.uri);
     } catch (error) {
-        // Throw error if the connection is failed and 
+        // Throw error if the connection is failed
         throw new AppError(`Database error : ${error}`, "DATABASE_ERROR", 500)
         // Turn off the server
         process.exit(1)
