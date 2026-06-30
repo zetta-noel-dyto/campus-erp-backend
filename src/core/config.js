@@ -1,22 +1,34 @@
-import dotenv from 'dotenv';
-import { AppError } from './error.js';
+// *************** IMPORT LIBRARY ***************
+import dotenv from 'dotenv'
+// *************** IMPORT MODULE ***************
+import { AppError } from './error.js'
 
-// Get the values in .env file
-dotenv.config();
+// *************** START: Environment Configuration Initialization ***************
 
+// Load ecosystem variables into memory to configure core infrastructure ports and database URIs
+dotenv.config()
+
+// *************** END: Environment Configuration Initialization ***************
+
+// *************** GLOBAL VARIABLES ***************
 const db = {
     uri: process.env.MONGO_URI
 }
 
 const port = process.env.PORT
 
+// *************** START: Configuration Dependency Validation ***************
+
 if (!db.uri || !port) {
-    // Throw an error when there are no env variables
+    // *************** Enforce strict environment variables configuration to halt runtime on missing parameters
     throw new AppError("Missing required env variables", "ENV_ERROR", 500)
-    // Shut down the server
+    // *************** Immediately terminate node process engine execution on fatal setup configurations
     process.exit(1)
 }
 
+// *************** END: Configuration Dependency Validation ***************
+
+// *************** EXPORT MODULE ***************
 export {
     db,
     port
