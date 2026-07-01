@@ -13,7 +13,6 @@ import { systemResolvers, systemTypeDefs } from './features/system/index.js';
 // Instantiate Express application framework instance to host network middleware layers
 const app = express();
 
-// *************** QUERY ***************
 /**
  * Orchestrates systemic asynchronous application bootstrap phases including storage layer hydration and network exposure.
  * 
