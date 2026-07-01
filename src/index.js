@@ -11,7 +11,7 @@ import { systemResolvers, systemTypeDefs } from './features/system/index.js';
 
 // *************** GLOBAL VARIABLES ***************
 // Instantiate Express application framework instance to host network middleware layers
-const app = express()
+const app = express();
 
 // *************** QUERY ***************
 /**
