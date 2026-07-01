@@ -1,4 +1,6 @@
-// *************** GLOBAL VARIABLES ***************
+// *************** IMPORT LIBRARY ***************
+import { GraphQLError } from "graphql";
+
 /**
  * Standardized operational error wrapper mechanism enforcing architectural contract compliance across layers.
  * 
@@ -14,7 +16,34 @@ class AppError extends Error {
     }
 }
 
+/**
+ * Transforms system exceptions into standard format GraphQLErrors for client transport layers.
+ * 
+ * @param {Error|AppError|GraphQLError} error - Incoming native or custom error object from downstream processes
+ * @returns {GraphQLError} Standardized error structure populated with domain-specific extensions
+ */
+const NormalizeGqlError = (error) => {
+    if (error instanceof GraphQLError) {
+        throw error;
+    }
+
+    if (error instanceof AppError) {
+        return new GraphQLError(error.message, {
+            extensions: {
+                code: error.code,
+                ...(error.httpStatus && { http: { status: error.httpStatus } }),
+                ...(error.meta && { meta: error.meta })
+            }
+        })
+    }
+
+    return new GraphQLError('An internal server error occured', {
+        extensions: { code: "INTERNAL_SERVER_ERROR", http: { status: 500 } }
+    })
+}
+
 // *************** EXPORT MODULE ***************
 export {
-    AppError
+    AppError,
+    NormalizeGqlError
 }
