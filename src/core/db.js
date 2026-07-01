@@ -6,6 +6,7 @@ import { AppError } from "./error.js"
 import { db } from "./config.js"
 
 // *************** GLOBAL VARIABLES ***************
+// Reference the native Mongoose connection lifecycle manager to attach infrastructure event hooks
 const connection = mongoose.connection
 
 // *************** START: Connection Event Listeners Registration ***************
@@ -15,9 +16,13 @@ connection.on("open", () => {
     console.log("Database connected")
 })
 
-// *************** Enforce global application panic error state interception if runtime stream interfaces failure event
-connection.on("error", (error) => {
-    throw new AppError(`Connection error : ${error}`, "CONNECTION_DB_ERROR", 500)
+// *************** Intercept transient database stream errors and execute a controlled platform runtime shutdown
+connection.on("error", async (error) => {
+    console.error("Database error:", error)
+    // *************** Teardown existing connections gracefully before forcing a process engine failure state
+    await mongoose.disconnect()
+    // *************** Terminate node process engine to prevent execution of unhandled loose queries during downtime
+    process.exit(1)
 })
 
 // *************** END: Connection Event Listeners Registration ***************
@@ -32,12 +37,14 @@ connection.on("error", (error) => {
 const ConnectDB = async () => {
     try {
         // *************** Intercept native client state engine driver validation to trigger backend storage bind
-        await mongoose.connect(db.uri);
+        await mongoose.connect(db.uri)
     } catch (error) {
         // *************** Enforce architectural fallback panic state structures if initial authentication packets fail
-        throw new AppError(`Database error : ${error}`, "DATABASE_ERROR", 500)
-        // *************** Terminate local platform node instances to avoid execution of loose queries
-        process.exit(1)
+        throw new AppError(
+            `Database error : ${error}`,
+            "DATABASE_ERROR",
+            500
+        )
     }
 }
 

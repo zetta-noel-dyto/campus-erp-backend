@@ -13,37 +13,53 @@ import { systemResolvers, systemTypeDefs } from './features/system/index.js';
 // Instantiate Express application framework instance to host network middleware layers
 const app = express()
 
-// *************** START: Infrastructure & Database Orchestration ***************
+// *************** QUERY ***************
+/**
+ * Orchestrates systemic asynchronous application bootstrap phases including storage layer hydration and network exposure.
+ * 
+ * @returns {Promise<void>} Resolves once the database cluster and GraphQL transport layers achieve full operational readiness
+ */
+const init = async () => {
+    // *************** Enforce synchronous lifecycle startup blocking to guarantee database readiness before binding network ports
+    await ConnectDB();
 
-// Establish persistent connection to MongoDB cluster before processing network traffic
-ConnectDB()
+    // *************** START: GraphQL Gateway Initialization ***************
 
-// Enforce standard security headers and resource sharing policies
-app.use(cors())
-// Parse incoming application/json payloads into request object context
-app.use(json())
+    // Inject foundational schema definitions and system orchestrators into Apollo Server instance
+    const server = new ApolloServer({
+        typeDefs: systemTypeDefs,
+        resolvers: systemResolvers
+    })
+    // Await async engine boot process before binding network transport layer middleware
+    await server.start();
 
-// *************** END: Infrastructure & Database Orchestration ***************
+    // *************** END: GraphQL Gateway Initialization ***************
 
-// *************** START: GraphQL Gateway Initialization ***************
+    // *************** START: Infrastructure & Middleware Orchestration ***************
 
-// Inject foundational schema definitions and system orchestrators into Apollo Server instance
-const server = new ApolloServer({
-    typeDefs: systemTypeDefs,
-    resolvers: systemResolvers
-})
-// Await async engine boot process before binding network transport layer middleware
-await server.start()
+    app
+        // Enforce standard security headers and resource sharing policies
+        .use(cors())
+        // Parse incoming application/json payloads into request object context
+        .use(json())
+        // Bind standalone GraphQL orchestrator endpoint specifically to the designated HTTP path
+        .use('/graphql', expressMiddleware(server))
 
-// Bind standalone GraphQL orchestrator endpoint specifically to the designated HTTP path
-app.use('/graphql', expressMiddleware(server))
+    // *************** END: Infrastructure & Middleware Orchestration ***************
 
-// *************** END: GraphQL Gateway Initialization ***************
+    // *************** START: Server Listener Boot ***************
 
-// *************** START: Server Listener Boot ***************
+    // Bind application listener to network port and expose infrastructure server runtime
+    app.listen(port, () => {
+        console.log(`Server running on http://localhost:${port}`);
+    })
 
-// Bind application listener to network port and expose infrastructure server runtime
-app.listen(port, () => {
-    console.log(`Server listening on http://localhost:${port}`);
-})
-// *************** END: Server Listener Boot ***************
+    // *************** END: Server Listener Boot ***************
+}
+
+// *************** START: Runtime Execution Trigger ***************
+
+// Execute top-level async control sequence to anchor operational infrastructure state trees
+await init();
+
+// *************** END: Runtime Execution Trigger ***************
