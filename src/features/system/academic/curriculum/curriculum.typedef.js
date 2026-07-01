@@ -80,15 +80,15 @@ input UpdateTestInput {
 type Mutation {
     CreateBlock(input: CreateBlockInput!): Block!
     UpdateBlock(id: ID!, input: UpdateBlockInput!): Block!
-    DeleteBlock(id: ID!): [Block]
+    DeleteBlock(id: ID!): Block
 
     CreateSubject(input: CreateSubjectInput!): Subject!
     UpdateSubject(id: ID!, input: UpdateSubjectInput!): Subject!
-    DeleteSubject(id: ID!): [Subject]
+    DeleteSubject(id: ID!): Subject
 
     CreateTest(input: CreateTestInput!): Test!
     UpdateTest(id: ID!, input: UpdateTestInput!): Test!
-    DeleteTest(id: ID!): [Test]
+    DeleteTest(id: ID!): Test
 }
 `
 
