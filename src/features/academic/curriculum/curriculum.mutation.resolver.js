@@ -1,5 +1,5 @@
 // *************** IMPORT MODULE ***************
-import { NormalizeGqlError } from "../../../../core/error.js";
+import { NormalizeGqlError } from "../../../core/error.js";
 import {
     checkEntityLock,
     CreateBlockHelper,

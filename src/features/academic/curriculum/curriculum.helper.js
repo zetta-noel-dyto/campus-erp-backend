@@ -2,7 +2,7 @@
 import mongoose from 'mongoose';
 
 // *************** IMPORT MODULE ***************
-import { AppError } from '../../../../core/error.js';
+import { AppError } from '../../../core/error.js';
 import { BlockModel as Blocks } from './curriculum.model.js';
 import { SubjectModel as Subjects } from "./curriculum.model.js";
 import { TestModel as Tests } from './curriculum.model.js';
