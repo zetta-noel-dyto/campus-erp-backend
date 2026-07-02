@@ -14,7 +14,7 @@ import { TestModel as Tests } from './curriculum.model.js';
  * @returns {Promise<object>} The created block document
  */
 const CreateBlockHelper = async (input) => {
-    const exist = await Blocks.findOne({ name: input.name });
+    const exist = await Blocks.findOne({ name: input.name }).lean();
     if (exist) {
         throw new AppError('Block already exist', "BLOCK_EXIST", 409);
     }
@@ -35,12 +35,12 @@ const CreateBlockHelper = async (input) => {
  * @returns {Promise<object>} The mutated block document
  */
 const UpdateBlockHelper = async (id, input) => {
-    const exist = await Blocks.findById(id);
+    const exist = await Blocks.findById(id).lean();
     if (!exist) {
         throw new AppError('Block not found', "BLOCK_NOT_FOUND", 404);
     }
 
-    const check = await Blocks.findOne({ name: input.name, _id: { $ne: id } });
+    const check = await Blocks.findOne({ name: input.name, _id: { $ne: id } }).lean();
     if (check) {
         throw new AppError('Block already exist', "BLOCK_EXIST", 409);
     }
@@ -60,12 +60,12 @@ const UpdateBlockHelper = async (id, input) => {
  * @returns {Promise<object>} The deleted block document pre-destruction
  */
 const DeleteBlockHelper = async (id) => {
-    const block = await Blocks.findById(id);
+    const block = await Blocks.findById(id).lean();
     if (!block) {
         throw new AppError('Block not found', "BLOCK_NOT_FOUND", 404);
     }
 
-    const subjects = await Subjects.exists({ block_id: id });
+    const subjects = await Subjects.exists({ block_id: id }).lean();
     if (subjects) {
         throw new AppError("Cannot delete block with existing subjects", "BLOCK_HAS_CHILDREN", 409);
     }
@@ -81,12 +81,12 @@ const DeleteBlockHelper = async (id) => {
  * @returns {Promise<object>} The created subject document
  */
 const CreateSubjectHelper = async (input) => {
-    const block = await Blocks.findById(input.block_id);
+    const block = await Blocks.findById(input.block_id).lean();
     if (!block) {
         throw new AppError('Block not found', "BLOCK_NOT_FOUND", 404);
     }
 
-    const exist = await Subjects.findOne({ name: input.name });
+    const exist = await Subjects.findOne({ name: input.name }).lean();
     if (exist) {
         throw new AppError('Subject already exist', "SUBJECT_EXIST", 409);
     }
@@ -107,12 +107,12 @@ const CreateSubjectHelper = async (input) => {
  * @returns {Promise<object>} The updated subject document
  */
 const UpdateSubjectHelper = async (id, input) => {
-    const exist = await Subjects.findById(id);
+    const exist = await Subjects.findById(id).lean();
     if (!exist) {
         throw new AppError('Subject not found', "SUBJECT_NOT_FOUND", 404);
     }
 
-    const check = await Subjects.findOne({ name: input.name, _id: { $ne: id } })
+    const check = await Subjects.findOne({ name: input.name, _id: { $ne: id } }).lean();
     if (check) {
         throw new AppError('Subject already exist', "SUBJECT_EXIST", 409);
     }
@@ -132,12 +132,12 @@ const UpdateSubjectHelper = async (id, input) => {
  * @returns {Promise<object>} The deleted subject document pre-destruction
  */
 const DeleteSubjectHelper = async (id) => {
-    const subject = await Subjects.findById(id);
+    const subject = await Subjects.findById(id).lean();
     if (!subject) {
         throw new AppError('Subject not found', "SUBJECT_NOT_FOUND", 404);
     }
 
-    const tests = await Tests.exists({ subject_id: id });
+    const tests = await Tests.exists({ subject_id: id }).lean();
     if (tests) {
         throw new AppError("Cannot delete subject with existing tests", "SUBJECT_HAS_CHILDREN", 409);
     }
@@ -153,12 +153,12 @@ const DeleteSubjectHelper = async (id) => {
  * @returns {Promise<object>} The created test document
  */
 const CreateTestHelper = async (input) => {
-    const subject = await Subjects.findById(input.subject_id);
+    const subject = await Subjects.findById(input.subject_id).lean();
     if (!subject) {
         throw new AppError('Subject not found', "SUBJECT_NOT_FOUND", 404);
     }
 
-    const exist = await Tests.findOne({ name: input.name });
+    const exist = await Tests.findOne({ name: input.name }).lean();
     if (exist) {
         throw new AppError('Test already exist', "TEST_EXIST", 409);
     }
@@ -179,12 +179,12 @@ const CreateTestHelper = async (input) => {
  * @returns {Promise<object>} The updated test document
  */
 const UpdateTestHelper = async (id, input) => {
-    const exist = await Tests.findById(id);
+    const exist = await Tests.findById(id).lean();
     if (!exist) {
         throw new AppError('Test not found', "TEST_NOT_FOUND", 404);
     }
 
-    const check = await Tests.findOne({ name: input.name, _id: { $ne: id } });
+    const check = await Tests.findOne({ name: input.name, _id: { $ne: id } }).lean();
     if (check) {
         throw new AppError('Test already exist', "TEST_EXIST", 409);
     }
@@ -204,7 +204,7 @@ const UpdateTestHelper = async (id, input) => {
  * @returns {Promise<object>} The wiped test document parameters
  */
 const DeleteTestHelper = async (id) => {
-    const test = await Tests.findById(id);
+    const test = await Tests.findById(id).lean();
     if (!test) {
         throw new AppError('Test not found', "TEST_NOT_FOUND", 404);
     }
@@ -220,7 +220,7 @@ const DeleteTestHelper = async (id) => {
  * @throws {AppError} 400 if aggregate weight breaches 100% threshold
  */
 const ValidateSubjectWeightage = async (block_id, incomingWeightage) => {
-    const subjects = await Subjects.find({ block_id });
+    const subjects = await Subjects.find({ block_id }).lean();
     let totalWeightages = subjects.reduce((acc, subject) => acc + subject.weightage, 0);
     totalWeightages = Number((totalWeightages + incomingWeightage).toFixed(2));
 
@@ -236,7 +236,7 @@ const ValidateSubjectWeightage = async (block_id, incomingWeightage) => {
  * @throws {AppError} 400 if aggregate weight breaches 100% threshold
  */
 const ValidateTestWeightage = async (subject_id, incomingWeightage) => {
-    const tests = await Tests.find({ subject_id });
+    const tests = await Tests.find({ subject_id }).lean();
     let totalWeightages = tests.reduce((acc, test) => acc + test.weightage, 0);
     totalWeightages = Number((totalWeightages + incomingWeightage).toFixed(2));
 
