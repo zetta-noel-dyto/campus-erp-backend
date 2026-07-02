@@ -110,34 +110,55 @@ const CreateSubjectHelper = async (input) => {
  * @returns {Promise<object>} The updated subject document
  */
 const UpdateSubjectHelper = async (id, input) => {
+    // *************** START: Validate subject existence ***************
     const exist = await Subjects.findById(id).lean();
     if (!exist) {
         throw new AppError('Subject not found', "SUBJECT_NOT_FOUND", 404);
     }
+    // *************** END: Validate subject existence ***************
 
+    // *************** START: Validate subject name uniqueness ***************
     if (input.name) {
         const check = await Subjects.findOne({ name: input.name, _id: { $ne: id } }).lean();
         if (check) {
             throw new AppError('Subject already exist', "SUBJECT_EXIST", 409);
         }
     }
+    // *************** END: Validate subject name uniqueness ***************
 
-    const subjects = await Subjects.find({ block_id: input.block_id });
+    // *************** START: Validate destination block ***************
+    // Ensure the target block exists when moving the subject to another block
+    if (input.block_id && input.block_id.toString() !== exist.block_id.toString()) {
+        const block = await Blocks.findById(input.block_id).lean();
+        if (!block) {
+            throw new AppError('Block not found', "BLOCK_NOT_FOUND", 404);
+        }
+    }
+    // *************** END: Validate destination block ***************
 
+    // *************** START: Validate cumulative subject weightage ***************
+    // Calculate the resulting total weightage after applying the requested update
+    const targetBlockID = input.block_id ?? exist.block_id;
+    const incomingWeightage = input.weightage ?? exist.weightage;
+
+    const subjects = await Subjects.find({ block_id: targetBlockID }).lean();
     let total = subjects
         .filter((subject) => subject._id.toString() !== id)
-        .reduce((acc, subject) => acc + subject.weightage, 0) + input.weightage;
-    total = Number(total.toFixed(2))
+        .reduce((acc, subject) => acc + subject.weightage, 0) + incomingWeightage;
+    total = Number(total.toFixed(2));
     if (total > 100) {
         throw new AppError('Subject weightage exceeds 100', "WEIGHTAGE_LIMIT_EXCEEDED", 400);
     }
+    // *************** END: Validate cumulative subject weightage ***************
 
+    // *************** START: Persist subject update ***************
     const subject = await Subjects.findByIdAndUpdate(id, input, { new: true });
     if (!subject) {
         throw new AppError('Failed to update subject', "UPDATE_SUBJECT_FAILED", 500);
     }
 
     return subject;
+    // *************** END: Persist subject update ***************
 }
 
 /**
@@ -195,34 +216,55 @@ const CreateTestHelper = async (input) => {
  * @returns {Promise<object>} The updated test document
  */
 const UpdateTestHelper = async (id, input) => {
+    // *************** START: Validate test existence ***************
     const exist = await Tests.findById(id).lean();
     if (!exist) {
         throw new AppError('Test not found', "TEST_NOT_FOUND", 404);
     }
+    // *************** END: Validate test existence ***************
 
+    // *************** START: Validate test name uniqueness ***************
     if (input.name) {
         const check = await Tests.findOne({ name: input.name, _id: { $ne: id } }).lean();
         if (check) {
             throw new AppError('Test already exist', "TEST_EXIST", 409);
         }
     }
+    // *************** END: Validate test name uniqueness ***************
 
-    const tests = await Tests.find({ subject_id: input.subject_id });
+    // *************** START: Validate destination subject ***************
+    // Ensure the target subject exists when moving the test to another subject
+    if (input.subject_id && input.subject_id.toString() !== exist.subject_id.toString()) {
+        const subject = await Subjects.findById(input.subject_id).lean();
+        if (!subject) {
+            throw new AppError('Subject not found', "SUBJECT_NOT_FOUND", 404);
+        }
+    }
+    // *************** END: Validate destination subject ***************
 
+    // *************** START: Validate cumulative test weightage ***************
+    // Calculate the resulting total weightage after applying the requested update
+    const targetSubjectID = input.subject_id ?? exist.subject_id;
+    const incomingWeightage = input.weightage ?? exist.weightage;
+
+    const tests = await Tests.find({ subject_id: targetSubjectID }).lean();
     let total = tests
         .filter((test) => test._id.toString() !== id)
-        .reduce((acc, test) => acc + test.weightage, 0) + input.weightage;
-    total = Number(total.toFixed(2))
+        .reduce((acc, test) => acc + test.weightage, 0) + incomingWeightage;
+    total = Number(total.toFixed(2));
     if (total > 100) {
         throw new AppError('Test weightage exceeds 100', "WEIGHTAGE_LIMIT_EXCEEDED", 400);
     }
+    // *************** END: Validate cumulative test weightage ***************
 
+    // *************** START: Persist test update ***************
     const test = await Tests.findByIdAndUpdate(id, input, { new: true });
     if (!test) {
         throw new AppError('Failed to update test', "UPDATE_TEST_FAILED", 500);
     }
 
     return test;
+    // *************** END: Persist test update ***************
 }
 
 /**
