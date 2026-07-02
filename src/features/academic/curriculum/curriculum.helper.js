@@ -122,12 +122,12 @@ const UpdateSubjectHelper = async (id, input) => {
         }
     }
 
-    const subjects = await Subjects.find({ block_id: exist.block_id });
+    const subjects = await Subjects.find({ block_id: input.block_id });
 
-    const total = subjects
+    let total = subjects
         .filter((subject) => subject._id.toString() !== id)
         .reduce((acc, subject) => acc + subject.weightage, 0) + input.weightage;
-
+    total = Number(total.toFixed(2))
     if (total > 100) {
         throw new AppError('Subject weightage exceeds 100', "WEIGHTAGE_LIMIT_EXCEEDED", 400);
     }
@@ -207,12 +207,12 @@ const UpdateTestHelper = async (id, input) => {
         }
     }
 
-    const tests = await Tests.find({ subject_id: exist.subject_id });
+    const tests = await Tests.find({ subject_id: input.subject_id });
 
-    const total = tests
+    let total = tests
         .filter((test) => test._id.toString() !== id)
         .reduce((acc, test) => acc + test.weightage, 0) + input.weightage;
-
+    total = Number(total.toFixed(2))
     if (total > 100) {
         throw new AppError('Test weightage exceeds 100', "WEIGHTAGE_LIMIT_EXCEEDED", 400);
     }
@@ -272,7 +272,7 @@ const ValidateTestWeightage = async (subject_id, incomingWeightage) => {
     totalWeightages = Number((totalWeightages + incomingWeightage).toFixed(2));
 
     if (totalWeightages > 100) {
-        throw new AppError('Subject weightage exceeds 100', "WEIGHTAGE_LIMIT_EXCEEDED", 400);
+        throw new AppError('Test weightage exceeds 100', "WEIGHTAGE_LIMIT_EXCEEDED", 400);
     }
 }
 
