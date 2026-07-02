@@ -6,9 +6,12 @@ import express, { json } from 'express';
 
 // *************** IMPORT MODULE ***************
 import { ConnectDB } from './core/db.js';
+import { curriculumResolvers, curriculumTypeDefs } from './features/academic/curriculum/index.js';
+import { DateScalar } from './core/graphql/scalar.date.js';
+import { enrollmentResolvers, enrollmentTypeDefs } from './features/academic/enrollment/index.js';
 import { port } from './core/config.js';
-import { curriculumResolvers, curriculumTypeDefs } from './features/system/academic/curriculum/index.js';
 import { systemResolvers, systemTypeDefs } from './features/system/index.js';
+import { studentResolver, studentTypeDefs } from './features/users/student/index.js';
 
 // *************** GLOBAL VARIABLES ***************
 const app = express();
@@ -22,8 +25,20 @@ const init = async () => {
     await ConnectDB();
 
     const server = new ApolloServer({
-        typeDefs: [systemTypeDefs, curriculumTypeDefs],
-        resolvers: [systemResolvers, curriculumResolvers]
+        
+        typeDefs: [
+            curriculumTypeDefs,
+            enrollmentTypeDefs,
+            studentTypeDefs,
+            systemTypeDefs,
+        ],
+        resolvers: {
+            Date: DateScalar,
+            ...curriculumResolvers,
+            ...enrollmentResolvers,
+            ...studentResolver,
+            ...systemResolvers,
+        }
     })
     await server.start();
 
