@@ -25,7 +25,6 @@ const init = async () => {
     await ConnectDB();
 
     const server = new ApolloServer({
-        
         typeDefs: [
             curriculumTypeDefs,
             enrollmentTypeDefs,
@@ -34,10 +33,14 @@ const init = async () => {
         ],
         resolvers: {
             Date: DateScalar,
-            ...curriculumResolvers,
-            ...enrollmentResolvers,
-            ...studentResolver,
-            ...systemResolvers,
+            Mutation: {
+                ...curriculumResolvers.Mutation,
+                ...enrollmentResolvers.Mutation,
+                ...studentResolver.Mutation,
+            },
+            Query: {
+                ...systemResolvers.Query
+            }
         }
     })
     await server.start();
