@@ -1,22 +1,25 @@
 // *************** GLOBAL VARIABLES ***************
+// GraphQL schema definition containing curriculum-related types,
+// input objects, and mutation operations exposed by this module.
 const typeDefs = `#graphql
 
+# *************** OBJECT TYPES ***************
 type GradingRule {
-    id: ID!
+    _id: ID!
     label: String!
     operator: String!
     threshold: Float!
 }
 
 type Block {
-    id: ID!
+    _id: ID!
     name: String!
     academic_year: String!
-    grading_rules: [GradingRule!]!   
+    grading_rules: [GradingRule!]!
 }
 
 type Subject {
-    id: ID!
+    _id: ID!
     name: String!
     block_id: ID!
     weightage: Float!
@@ -24,13 +27,14 @@ type Subject {
 }
 
 type Test {
-    id: ID!
+    _id: ID!
     name: String!
     subject_id: ID!
     weightage: Float!
     grading_rules: [GradingRule!]!
 }
 
+# *************** INPUT TYPES ***************
 input GradingRuleInput {
     label: String!
     operator: String!
@@ -77,6 +81,7 @@ input UpdateTestInput {
     grading_rules: [GradingRuleInput!]
 }
 
+# *************** MUTATIONS ***************
 type Mutation {
     CreateBlock(input: CreateBlockInput!): Block!
     UpdateBlock(id: ID!, input: UpdateBlockInput!): Block!

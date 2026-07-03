@@ -4,10 +4,13 @@ import {
     checkEntityLock,
     CreateBlockHelper,
     CreateSubjectHelper,
+    CreateTestHelper,
     DeleteBlockHelper,
+    DeleteSubjectHelper,
     DeleteTestHelper,
     UpdateBlockHelper,
     UpdateSubjectHelper,
+    UpdateTestHelper,
     ValidateSubjectWeightage,
     ValidateTestWeightage
 } from "./curriculum.helper.js";
@@ -24,11 +27,12 @@ import {
     UpdateSubjectSchema,
     UpdateTestSchema,
     ValidateInput
-} from "./curriculum.validator.js"
+} from "./curriculum.validator.js";
 
+// *************** BLOCK RESOLVERS ***************
 /**
  * Validates inputs and creates a new academic block record via helper.
- * * @param {null} _ - Unused GraphQL root source context
+ * @param {null} _ - Unused GraphQL root source context
  * @param {object} args - Request parameters
  * @param {object} args.input - Payload configurations for the new block
  * @throws {GraphQLError} Normalized representation of validation or creation failures
@@ -45,7 +49,7 @@ const CreateBlock = async (_, { input }) => {
 
 /**
  * Updates an un-locked academic block using partial adjustments via helper.
- * * @param {null} _ - Unused GraphQL root source context
+ * @param {null} _ - Unused GraphQL root source context
  * @param {object} args - Request parameters
  * @param {string} args.id - Unique block target identifier
  * @param {object} args.input - Partial payload properties containing mutations
@@ -64,7 +68,7 @@ const UpdateBlock = async (_, { id, input }) => {
 
 /**
  * Destroys a chosen academic block using strict relational checks via helper.
- * * @param {null} _ - Unused GraphQL root source context
+ * @param {null} _ - Unused GraphQL root source context
  * @param {object} args - Request parameters
  * @param {string} args.id - Unique block target identifier
  * @throws {GraphQLError} Normalized operational errors if the resource state is locked
@@ -79,9 +83,10 @@ const DeleteBlock = async (_, { id }) => {
     }
 }
 
+// *************** SUBJECT RESOLVERS ***************
 /**
  * Validates constraints and generates a new subject entry via helper.
- * * @param {null} _ - Unused GraphQL root source context
+ * @param {null} _ - Unused GraphQL root source context
  * @param {object} args - Request parameters
  * @param {object} args.input - Payload containing name, parent block references, and weights
  * @throws {GraphQLError} Normalized errors handling schema verification or cumulative weight breaches
@@ -99,7 +104,7 @@ const CreateSubject = async (_, { input }) => {
 
 /**
  * Modifies structural components on a designated unlocked subject via helper.
- * * @param {null} _ - Unused GraphQL root source context
+ * @param {null} _ - Unused GraphQL root source context
  * @param {object} args - Request parameters
  * @param {string} args.id - Unique subject target identifier
  * @param {object} args.input - Partial schema items targeted for overriding fields
@@ -118,7 +123,7 @@ const UpdateSubject = async (_, { id, input }) => {
 
 /**
  * Purges an individual subject descriptor from database persistence via helper.
- * * @param {null} _ - Unused GraphQL root source context
+ * @param {null} _ - Unused GraphQL root source context
  * @param {object} args - Request parameters
  * @param {string} args.id - Unique subject target identifier
  * @throws {GraphQLError} Normalized errors detailing active entity lock states
@@ -133,9 +138,10 @@ const DeleteSubject = async (_, { id }) => {
     }
 }
 
+// *************** TEST RESOLVERS ***************
 /**
  * Enforces fractional limit tracking and instantiates a new examination test.
- * * @param {null} _ - Unused GraphQL root source context
+ * @param {null} _ - Unused GraphQL root source context
  * @param {object} args - Request parameters
  * @param {object} args.input - Properties matching name, parent subject ties, and weight points
  * @throws {GraphQLError} Normalized errors handling schema exceptions or weightage overflows
@@ -145,7 +151,7 @@ const CreateTest = async (_, { input }) => {
     try {
         const data = ValidateInput(CreateTestSchema, input);
         await ValidateTestWeightage(data.subject_id, data.weightage);
-        return await Tests.create(data);
+        return await CreateTestHelper(data);
     } catch (error) {
         throw NormalizeGqlError(error);
     }
@@ -153,7 +159,7 @@ const CreateTest = async (_, { input }) => {
 
 /**
  * Overwrites specific parameters on an un-locked test descriptor document.
- * * @param {null} _ - Unused GraphQL root source context
+ * @param {null} _ - Unused GraphQL root source context
  * @param {object} args - Request parameters
  * @param {string} args.id - Unique test target identifier
  * @param {object} args.input - Modifiable values mapping over structural properties
@@ -164,7 +170,7 @@ const UpdateTest = async (_, { id, input }) => {
     try {
         await checkEntityLock(id);
         const data = ValidateInput(UpdateTestSchema, input);
-        return await Tests.findByIdAndUpdate(id, data, { new: true });
+        return await UpdateTestHelper(id, data);
     } catch (error) {
         throw NormalizeGqlError(error);
     }
@@ -172,7 +178,7 @@ const UpdateTest = async (_, { id, input }) => {
 
 /**
  * Removes an individual test item using verification protocols via helper.
- * * @param {null} _ - Unused GraphQL root source context
+ * @param {null} _ - Unused GraphQL root source context
  * @param {object} args - Request parameters
  * @param {string} args.id - Unique test target identifier
  * @throws {GraphQLError} Normalized errors dealing with unexpected modification locks
