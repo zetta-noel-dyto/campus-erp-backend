@@ -6,59 +6,52 @@ import express, { json } from 'express';
 
 // *************** IMPORT MODULE ***************
 import { ConnectDB } from './core/db.js';
+import { curriculumResolvers, curriculumTypeDefs } from './features/academic/curriculum/index.js';
 import { port } from './core/config.js';
 import { systemResolvers, systemTypeDefs } from './features/system/index.js';
 
 // *************** GLOBAL VARIABLES ***************
-// Instantiate Express application framework instance to host network middleware layers
+// Express application instance used to register middleware and expose HTTP endpoints
 const app = express();
 
 /**
  * Orchestrates systemic asynchronous application bootstrap phases including storage layer hydration and network exposure.
- * 
+ * Initializes the database connection, starts the GraphQL server,
+ * registers middleware, and begins listening for incoming requests.
  * @returns {Promise<void>} Resolves once the database cluster and GraphQL transport layers achieve full operational readiness
  */
 const init = async () => {
-    // *************** Enforce synchronous lifecycle startup blocking to guarantee database readiness before binding network ports
+    // *************** START: Initialize database connection ***************
     await ConnectDB();
+    // *************** END: Initialize database connection ***************
 
-    // *************** START: GraphQL Gateway Initialization ***************
-
-    // Inject foundational schema definitions and system orchestrators into Apollo Server instance
+    // *************** START: Configure and start Apollo Server ***************
     const server = new ApolloServer({
-        typeDefs: systemTypeDefs,
-        resolvers: systemResolvers
+        typeDefs: [
+            curriculumTypeDefs,
+            systemTypeDefs
+        ],
+        resolvers: [
+            curriculumResolvers,
+            systemResolvers
+        ]
     })
-    // Await async engine boot process before binding network transport layer middleware
+
     await server.start();
+    // *************** END: Configure and start Apollo Server ***************
 
-    // *************** END: GraphQL Gateway Initialization ***************
-
-    // *************** START: Infrastructure & Middleware Orchestration ***************
-
+    // *************** START: Register application middleware ***************
     app
-        // Enforce standard security headers and resource sharing policies
         .use(cors())
-        // Parse incoming application/json payloads into request object context
         .use(json())
-        // Bind standalone GraphQL orchestrator endpoint specifically to the designated HTTP path
-        .use('/graphql', expressMiddleware(server))
+        .use('/graphql', expressMiddleware(server));
+    // *************** END: Register application middleware ***************
 
-    // *************** END: Infrastructure & Middleware Orchestration ***************
-
-    // *************** START: Server Listener Boot ***************
-
-    // Bind application listener to network port and expose infrastructure server runtime
+    // *************** START: Expose HTTP server ***************
     app.listen(port, () => {
         console.log(`Server running on http://localhost:${port}`);
     })
-
-    // *************** END: Server Listener Boot ***************
+    // *************** END: Expose HTTP server ***************
 }
 
-// *************** START: Runtime Execution Trigger ***************
-
-// Execute top-level async control sequence to anchor operational infrastructure state trees
 await init();
-
-// *************** END: Runtime Execution Trigger ***************
