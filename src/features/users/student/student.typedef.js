@@ -8,7 +8,6 @@ type Student {
     email: String!
     student_number: String!
     registration_date: Date!
-    academic_year_ids: [ID!]!
 }
 
 # *************** INPUT TYPES ***************
