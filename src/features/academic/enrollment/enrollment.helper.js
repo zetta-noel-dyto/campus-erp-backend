@@ -4,10 +4,22 @@ import { AppError } from '../../../core/error.js';
 import { StudentModel as Students } from '../../users/student/student.model.js';
 
 // *************** STUDENT ENROLLMENT HELPER ***************
+
 /**
- * Enrolls multiple students into an academic year using transactional consistency.
+ * Enrolls multiple students into an academic year using sequential update operations
+ * This function ensures:
+ * - Academic year exists and is active
+ * - All student IDs are valid
+ * - Students are added to both AcademicYear and Student collections
+ * - Data consistency between both sides of the relation
  * @param {object} input - Enrollment payload containing academic_year_id and student_ids
- * @throws {AppError} Various domain errors for invalid state, missing entities, or closed enrollment
+ * @param {string} input.academic_year_id - Target academic year ID
+ * @param {string[]} input.student_ids - List of student IDs to enroll
+ *
+ * @throws {AppError} ACADEMIC_YEAR_NOT_FOUND - If academic year does not exist
+ * @throws {AppError} ACADEMIC_YEAR_CLOSED - If academic year is not active
+ * @throws {AppError} INVALID_STUDENT_REFERENCE - If any student ID is invalid or not found
+ *
  * @returns {Promise<object>} Updated academic year document with enrolled students
  */
 const EnrollStudentHelper = async (input) => {
@@ -26,7 +38,9 @@ const EnrollStudentHelper = async (input) => {
   // *************** START: Validate student references ***************
   const uniqueStudentIDs = [...new Set(input.student_ids)];
 
-  const countStudents = await Students.countDocuments({ _id: { $in: uniqueStudentIDs } });
+  const countStudents = await Students.countDocuments({
+    _id: { $in: uniqueStudentIDs },
+  });
 
   if (countStudents !== uniqueStudentIDs.length) {
     throw new AppError('One or more student IDs are invalid or not found', 'INVALID_STUDENT_REFERENCE', 400);
