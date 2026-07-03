@@ -1,6 +1,10 @@
+// *************** GLOBAL VARIABLES ***************
+// GraphQL schema definition for student domain including types, scalars, and mutations
 const typeDefs = `#graphql
+# *************** SCALARS ***************
 scalar Date
 
+# *************** OBJECT TYPES ***************
 type Student {
     first_name: String!
     last_name: String!
@@ -10,6 +14,7 @@ type Student {
     academic_year_ids: [ID!]!
 }
 
+# *************** INPUT TYPES ***************
 input CreateStudentInput {
     first_name: String!
     last_name: String!
@@ -18,11 +23,13 @@ input CreateStudentInput {
     academic_year_ids: [ID!]!
 }
 
+# *************** MUTATIONS ***************
 type Mutation {
     CreateStudent(input: CreateStudentInput!): Student!
 }
 `
 
+// *************** EXPORT MODULE ***************
 export {
     typeDefs
 }
