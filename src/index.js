@@ -6,9 +6,13 @@ import express, { json } from 'express';
 
 // *************** IMPORT MODULE ***************
 import { ConnectDB } from './core/db.js';
-import { curriculumResolvers, curriculumTypeDefs } from './features/academic/curriculum/index.js';
-import { DateScalar } from './core/graphql/scalar.date.js';
-import { enrollmentResolvers, enrollmentTypeDefs } from './features/academic/enrollment/index.js';
+import {
+    curriculumResolvers,
+    curriculumTypeDefs,
+    enrollmentResolvers,
+    enrollmentTypeDefs
+} from './features/academic/index.js';
+import { DateScalar } from './shared/graphql/scalar.date.js';
 import { port } from './core/config.js';
 import { systemResolvers, systemTypeDefs } from './features/system/index.js';
 import { studentResolver, studentTypeDefs } from './features/users/student/index.js';

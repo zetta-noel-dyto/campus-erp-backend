@@ -1,6 +1,9 @@
 // *************** GLOBAL VARIABLES ***************
 // GraphQL schema definition for student domain including types, scalars, and mutations
 const typeDefs = `#graphql
+# *************** SCALARS ***************
+scalar Date
+
 # *************** OBJECT TYPES ***************
 type Student {
     first_name: String!
