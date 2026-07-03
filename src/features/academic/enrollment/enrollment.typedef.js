@@ -1,9 +1,6 @@
 // *************** GLOBAL VARIABLES ***************
 // GraphQL schema definition for AcademicYear domain including enrollment mutation
 const typeDefs = `#graphql
-# *************** SCALARS ***************
-scalar Date
-
 # *************** OBJECT TYPES ***************
 type AcademicYear {
     name: String!
