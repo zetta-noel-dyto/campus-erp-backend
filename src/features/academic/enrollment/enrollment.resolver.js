@@ -1,8 +1,8 @@
 // *************** IMPORT MODULE ***************
-import { EnrollStudentsSchema } from "./enrollment.validator.js";
-import { ValidateInput } from "../curriculum/curriculum.validator.js";
-import { NormalizeGqlError } from "../../../core/error.js";
-import { EnrollStudentHelper } from "./enrollment.helper.js";
+import { EnrollStudentsSchema } from './enrollment.validator.js';
+import { ValidateInput } from '../curriculum/curriculum.validator.js';
+import { NormalizeGqlError } from '../../../core/error.js';
+import { EnrollStudentHelper } from './enrollment.helper.js';
 
 // *************** ENROLLMENT RESOLVERS ***************
 /**
@@ -14,25 +14,23 @@ import { EnrollStudentHelper } from "./enrollment.helper.js";
  * @returns {Promise<object>} Updated academic year document after enrollment
  */
 const EnrollStudentsToYear = async (_, { input }) => {
-    try {
-        // *************** START: Validate input payload ***************
-        const data = ValidateInput(EnrollStudentsSchema, input);
-        // *************** END: Validate input payload ***************
+  try {
+    // *************** START: Validate input payload ***************
+    const data = ValidateInput(EnrollStudentsSchema, input);
+    // *************** END: Validate input payload ***************
 
-        return await EnrollStudentHelper(data);
-    } catch (error) {
-        throw NormalizeGqlError(error);
-    }
-}
+    return await EnrollStudentHelper(data);
+  } catch (error) {
+    throw NormalizeGqlError(error);
+  }
+};
 
 // *************** GRAPHQL RESOLVERS ***************
 const resolver = {
-    Mutation: {
-        EnrollStudentsToYear
-    }
-}
+  Mutation: {
+    EnrollStudentsToYear,
+  },
+};
 
 // *************** EXPORT MODULE ***************
-export {
-    resolver
-}
+export { resolver };

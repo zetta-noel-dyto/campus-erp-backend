@@ -1,8 +1,8 @@
 // *************** IMPORT MODULE ***************
-import { CreateStudentSchema } from "./student.validator.js";
-import { CreateStudentHelper } from "./student.helper.js";
-import { NormalizeGqlError } from "../../../core/error.js";
-import { ValidateInput } from "../../academic/curriculum/curriculum.validator.js";
+import { CreateStudentSchema } from './student.validator.js';
+import { CreateStudentHelper } from './student.helper.js';
+import { NormalizeGqlError } from '../../../core/error.js';
+import { ValidateInput } from '../../academic/curriculum/curriculum.validator.js';
 
 // *************** STUDENT RESOLVERS ***************
 /**
@@ -14,25 +14,23 @@ import { ValidateInput } from "../../academic/curriculum/curriculum.validator.js
  * @returns {Promise<object>} The newly created student document
  */
 const CreateStudent = async (_, { input }) => {
-    try {
-        // *************** START: Validate input payload ***************
-        const data = ValidateInput(CreateStudentSchema, input);
-        // *************** END: Validate input payload ***************
-        
-        return await CreateStudentHelper(data);
-    } catch (error) {
-        throw NormalizeGqlError(error);
-    }
-}
+  try {
+    // *************** START: Validate input payload ***************
+    const data = ValidateInput(CreateStudentSchema, input);
+    // *************** END: Validate input payload ***************
+
+    return await CreateStudentHelper(data);
+  } catch (error) {
+    throw NormalizeGqlError(error);
+  }
+};
 
 // *************** GRAPHQL RESOLVERS ***************
 const resolver = {
-    Mutation: {
-        CreateStudent
-    }
-}
+  Mutation: {
+    CreateStudent,
+  },
+};
 
 // *************** EXPORT MODULE ***************
-export {
-    resolver
-}
+export { resolver };
