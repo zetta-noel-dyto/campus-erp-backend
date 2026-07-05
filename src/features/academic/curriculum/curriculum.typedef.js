@@ -2,7 +2,6 @@
 // GraphQL schema definition containing curriculum-related types,
 // input objects, and mutation operations exposed by this module.
 const typeDefs = `#graphql
-
 # *************** OBJECT TYPES ***************
 type GradingRule {
     _id: ID!
@@ -95,9 +94,7 @@ type Mutation {
     UpdateTest(id: ID!, input: UpdateTestInput!): Test!
     DeleteTest(id: ID!): Test
 }
-`
+`;
 
 // *************** EXPORT MODULE ***************
-export {
-    typeDefs
-}
+export { typeDefs };

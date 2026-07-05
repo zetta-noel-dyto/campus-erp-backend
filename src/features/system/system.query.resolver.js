@@ -1,13 +1,11 @@
 // *************** QUERY ***************
 const resolver = {
-    Query: {
-        ping: () => {
-            return "pong"
-        }
-    }
-}
+  Query: {
+    ping: () => {
+      return 'pong';
+    },
+  },
+};
 
 // *************** EXPORT MODULE ***************
-export {
-    resolver
-}
+export { resolver };
