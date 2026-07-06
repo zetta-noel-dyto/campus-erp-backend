@@ -60,9 +60,9 @@ const CreateStudentHelper = async (input) => {
         throw new AppError('Failed to create student', 'CREATE_STUDENT_FAILED', 500);
     }
 
-    return student;
-    // *************** END: Persist student creation ***************
-}
+  return student;
+  // *************** END: Persist student creation ***************
+};
 
 // *************** EXPORT MODULE ***************
 export {

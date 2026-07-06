@@ -94,9 +94,7 @@ type Mutation {
     UpdateTest(id: ID!, input: UpdateTestInput!): Test!
     DeleteTest(id: ID!): Test
 }
-`
+`;
 
 // *************** EXPORT MODULE ***************
-export {
-    typeDefs
-}
+export { typeDefs };

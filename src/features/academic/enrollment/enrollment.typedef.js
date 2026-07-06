@@ -21,9 +21,7 @@ input EnrollStudentInput {
 type Mutation {
     EnrollStudentsToYear(input: EnrollStudentInput!): AcademicYear!
 }
-`
+`;
 
 // *************** EXPORT MODULE ***************
-export {
-    typeDefs
-}
+export { typeDefs };

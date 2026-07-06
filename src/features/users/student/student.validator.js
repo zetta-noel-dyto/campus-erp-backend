@@ -1,5 +1,5 @@
 // *************** IMPORT LIBRARY ***************
-import Joi from "joi";
+import Joi from 'joi';
 
 // *************** STUDENT SCHEMAS ***************
 // Validation schema for creating a new student record

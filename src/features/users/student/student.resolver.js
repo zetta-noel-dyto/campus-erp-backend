@@ -45,6 +45,4 @@ const resolver = {
 }
 
 // *************** EXPORT MODULE ***************
-export {
-    resolver
-}
+export { resolver };
