@@ -44,7 +44,7 @@ const GetStudentsByAcademicYearHelper = async (input) => {
   const skip = (page - 1) * limit;
 
   const query = {
-    academic_year_ids: { $in: [new mongoose.Types.ObjectId(input.academic_year_id)] },
+    academic_year_ids: { $eq: new mongoose.Types.ObjectId(input.academic_year_id) },
   };
 
   if (input.search) {
