@@ -1,6 +1,6 @@
 // *************** IMPORT MODULE ***************
-import { CreateStudentSchema } from "./student.validator.js";
-import { CreateStudentHelper } from "./student.helper.js";
+import { CreateStudentSchema, GetStudentsByAcademicYearSchema } from "./student.validator.js";
+import { CreateStudentHelper, GetStudentsByAcademicYearHelper } from "./student.helper.js";
 import { NormalizeGqlError } from "../../../core/error.js";
 import { ValidateInput } from "../../academic/curriculum/curriculum.validator.js";
 
@@ -25,10 +25,22 @@ const CreateStudent = async (_, { input }) => {
     }
 }
 
+const GetStudentsByAcademicYear = async (_, { input }) => {
+    try {
+        const data = ValidateInput(GetStudentsByAcademicYearSchema, input);
+        return await GetStudentsByAcademicYearHelper(data);
+    } catch (error) {
+        
+    }
+}
+
 // *************** GRAPHQL RESOLVERS ***************
 const resolver = {
     Mutation: {
         CreateStudent
+    },
+    Query: {
+        GetStudentsByAcademicYear
     }
 }
 

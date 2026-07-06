@@ -18,7 +18,15 @@ const CreateStudentSchema = Joi.object({
         .default([])
 })
 
+const GetStudentsByAcademicYearSchema = Joi.object({
+    academic_year_id: Joi.string().hex().length(24).required(),
+    page: Joi.number().default(1).min(1),
+    limit: Joi.number().default(10).max(100),
+    search: Joi.string().trim().optional()
+})
+
 // *************** EXPORT MODULE ***************
 export {
-    CreateStudentSchema
+    CreateStudentSchema,
+    GetStudentsByAcademicYearSchema
 }
