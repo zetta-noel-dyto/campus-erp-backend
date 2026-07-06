@@ -3,6 +3,7 @@
 const typeDefs = `#graphql
 # *************** OBJECT TYPES ***************
 type AcademicYear {
+    _id: ID!
     name: String!
     start_date: Date!
     end_date: Date!
