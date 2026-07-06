@@ -34,8 +34,6 @@ connection.on('error', async (error) => {
  * @returns {Promise<void>} Resolves successfully when operational session pathways become active
  */
 const ConnectDB = async () => {
-  mongoose.set('debug', true);
-
   try {
     await mongoose.connect(db.uri);
   } catch (error) {

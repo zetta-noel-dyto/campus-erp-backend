@@ -20,7 +20,7 @@ const CreateStudentSchema = Joi.object({
 const GetStudentsByAcademicYearSchema = Joi.object({
   academic_year_id: Joi.string().hex().length(24).required(),
   page: Joi.number().default(1).min(1),
-  limit: Joi.number().default(10).max(100),
+  limit: Joi.number().min(1).default(10).max(100),
   search: Joi.string().trim().optional(),
 });
 
