@@ -3,15 +3,18 @@ import cors from 'cors';
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@as-integrations/express5';
 import express, { json } from 'express';
+import { makeExecutableSchema } from '@graphql-tools/schema';
 
 // *************** IMPORT MODULE ***************
+import { authDirectiveTransformer, typeDefs as authDirectiveTypeDefs } from './shared/directives/auth.directive.js';
+import { AuthMiddleware } from './shared/middlewares/auth.middleware.js';
+import { authResolvers, authTypeDefs, studentResolver, studentTypeDefs } from './features/users/index.js';
 import { ConnectDB } from './core/db.js';
 import { CreateAcademicYearLoader } from './loader/academic_year.loader.js';
 import { curriculumResolvers, curriculumTypeDefs, enrollmentResolvers, enrollmentTypeDefs } from './features/academic/index.js';
 import { DateScalar } from './shared/graphql/scalar.date.js';
 import { port } from './core/config.js';
 import { systemResolvers, systemTypeDefs } from './features/system/index.js';
-import { studentResolver, studentTypeDefs } from './features/users/index.js';
 import { typeDefs as dateTypeDefs } from './shared/graphql/scalar.date.typedef.js';
 
 // *************** GLOBAL VARIABLES ***************
@@ -29,12 +32,20 @@ const init = async () => {
   await ConnectDB();
   // *************** END: Initialize database connection ***************
 
-  // *************** START: Configure and start Apollo Server ***************
-  const server = new ApolloServer({
-    typeDefs: [curriculumTypeDefs, dateTypeDefs, enrollmentTypeDefs, studentTypeDefs, systemTypeDefs],
+  const schema = makeExecutableSchema({
+    typeDefs: [
+      authDirectiveTypeDefs,
+      authTypeDefs,
+      curriculumTypeDefs,
+      dateTypeDefs,
+      enrollmentTypeDefs,
+      studentTypeDefs,
+      systemTypeDefs,
+    ],
     resolvers: {
       Date: DateScalar,
       Mutation: {
+        ...authResolvers.Mutation,
         ...curriculumResolvers.Mutation,
         ...enrollmentResolvers.Mutation,
         ...studentResolver.Mutation,
@@ -48,6 +59,12 @@ const init = async () => {
       },
     },
   });
+  const authTransformedSchema = authDirectiveTransformer(schema, 'auth');
+
+  // *************** START: Configure and start Apollo Server ***************
+  const server = new ApolloServer({
+    schema: authTransformedSchema,
+  });
   await server.start();
   // *************** END: Configure and start Apollo Server ***************
 
@@ -55,11 +72,13 @@ const init = async () => {
   app
     .use(cors())
     .use(json())
+    .use(AuthMiddleware)
     .use(
       '/graphql',
       expressMiddleware(server, {
-        context: async () => {
+        context: async ({ req }) => {
           return {
+            user: req.user,
             AcademicYearLoader: CreateAcademicYearLoader(),
           };
         },

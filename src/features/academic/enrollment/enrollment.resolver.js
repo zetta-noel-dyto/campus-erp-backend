@@ -1,8 +1,8 @@
 // *************** IMPORT MODULE ***************
 import { EnrollStudentsSchema } from './enrollment.validator.js';
-import { ValidateInput } from '../curriculum/curriculum.validator.js';
-import { NormalizeGqlError } from '../../../core/error.js';
 import { EnrollStudentHelper } from './enrollment.helper.js';
+import { NormalizeGqlError } from '../../../core/error.js';
+import { ValidateInput } from '../../../shared/validators/validators.input.js';
 
 // *************** ENROLLMENT RESOLVERS ***************
 /**

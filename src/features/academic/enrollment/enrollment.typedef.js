@@ -20,7 +20,7 @@ input EnrollStudentInput {
 
 # *************** MUTATIONS ***************
 type Mutation {
-    EnrollStudentsToYear(input: EnrollStudentInput!): AcademicYear!
+    EnrollStudentsToYear(input: EnrollStudentInput!): AcademicYear! @auth(requires: admin)
 }
 `;
 
