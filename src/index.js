@@ -32,34 +32,37 @@ const init = async () => {
   await ConnectDB();
   // *************** END: Initialize database connection ***************
 
+  // *************** START: Build GraphQL executable schema ***************
+  // Combine all feature type definitions and resolvers into a single GraphQL schema.
   const schema = makeExecutableSchema({
-    typeDefs: [
-      authDirectiveTypeDefs,
-      authTypeDefs,
-      curriculumTypeDefs,
-      dateTypeDefs,
-      enrollmentTypeDefs,
-      studentTypeDefs,
-      systemTypeDefs,
-    ],
+    // Register GraphQL type definitions from authentication, academic, user, and system modules.
+    typeDefs: [authDirectiveTypeDefs, authTypeDefs, curriculumTypeDefs, dateTypeDefs, enrollmentTypeDefs, studentTypeDefs, systemTypeDefs],
+
+    // Merge resolver implementations from each application module.
     resolvers: {
+      // Register custom scalar resolver for date-related fields.
       Date: DateScalar,
+      // Combine all mutation operations exposed by the GraphQL API.
       Mutation: {
         ...authResolvers.Mutation,
         ...curriculumResolvers.Mutation,
         ...enrollmentResolvers.Mutation,
         ...studentResolver.Mutation,
       },
+      // Combine all query operations exposed by the GraphQL API.
       Query: {
         ...systemResolvers.Query,
         ...studentResolver.Query,
       },
+      // Register field-level resolvers for Student object type.
       Student: {
         ...studentResolver.Student,
       },
     },
   });
+  // Apply authorization directive middleware to protected GraphQL fields.
   const authTransformedSchema = authDirectiveTransformer(schema, 'auth');
+  // *************** END: Build GraphQL executable schema ***************
 
   // *************** START: Configure and start Apollo Server ***************
   const server = new ApolloServer({
@@ -76,9 +79,11 @@ const init = async () => {
     .use(
       '/graphql',
       expressMiddleware(server, {
+        // Build GraphQL execution context with authenticated user data and request-level loaders.
         context: async ({ req }) => {
           return {
             user: req.user,
+            // Initialize DataLoader instance to optimize academic year data fetching.
             AcademicYearLoader: CreateAcademicYearLoader(),
           };
         },
@@ -93,4 +98,5 @@ const init = async () => {
   // *************** END: Expose HTTP server ***************
 };
 
+// *************** INITIALIZE APPLICATION ***************
 await init();

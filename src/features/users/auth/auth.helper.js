@@ -1,21 +1,47 @@
+// *************** IMPORT LIBRARY ***************
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+
+// *************** IMPORT MODULE ***************
 import { AppError } from '../../../core/error.js';
 import { jwt_secret } from '../../../core/config.js';
 import { UserModel as Users } from '../user/user.model.js';
 
+// *************** HELPER FUNCTION ***************
+/**
+ * Authenticates a user using email and password credentials.
+ * @param {Object} input - User login credentials.
+ * @param {string} input.email - User email address.
+ * @param {string} input.password - User plain-text password.
+ * @returns {string} Signed JWT access token.
+ * @throws {AppError} Throws unauthorized error when credentials are invalid.
+ */
 const LoginHelper = async (input) => {
+  // *************** START: Fetch user account ***************
+  // Retrieve user data by email while converting the document into a plain object.
   const user = await Users.findOne({ email: input.email }).lean();
+
+  // Reject authentication when no account matches the provided email.
   if (!user) {
     throw new AppError('Invalid email or password', 'UNAUTHORIZED', 401);
   }
+  // *************** END: Fetch user account ***************
 
+  // *************** START: Validate user password ***************
+  // Compare provided password with the hashed password stored in the database.
   const comparePassword = await bcrypt.compare(input.password, user.password);
+
+  // Reject authentication when password verification fails.
   if (!comparePassword) {
     throw new AppError('Invalid email or password', 'UNAUTHORIZED', 401);
   }
+  // *************** END: Validate user password ***************
 
+  // *************** START: Generate authentication token ***************
+  // Create JWT token containing user identity and role information for future authorization checks.
   return jwt.sign({ userId: user._id, role: user.role }, jwt_secret, { expiresIn: '8h' });
+  // *************** END: Generate authentication token ***************
 };
 
+// *************** EXPORT MODULE ***************
 export { LoginHelper };

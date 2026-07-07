@@ -1,3 +1,5 @@
+// *************** TYPE DEFINITIONS ***************
+// GraphQL schema definitions for user authentication operations and user data structure.
 const typeDefs = `#graphql
 type User {
     _id: ID!
@@ -15,4 +17,5 @@ type Mutation {
 }
 `;
 
+// *************** EXPORT MODULE ***************
 export { typeDefs };
