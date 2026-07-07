@@ -1,3 +1,6 @@
+// *************** IMPORT LIBRARY ***************
+import { GraphQLError } from 'graphql';
+
 /**
  * Validates payload structures against Joi schemas and maps errors to GraphQLError format.
  * @param {object} schema - Target validation blueprint
