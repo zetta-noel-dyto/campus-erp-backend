@@ -56,7 +56,7 @@ const authDirectiveTransformer = (schema, directiveName) => {
           const role = context.user.role;
 
           if (requires === 'admin') return role === 'admin';
-          if (required === 'teacher') return role === 'teacher' || role === 'admin';
+          if (requires === 'teacher') return role === 'teacher' || role === 'admin';
 
           return false;
         })();
