@@ -6,6 +6,7 @@ import express, { json } from 'express';
 
 // *************** IMPORT MODULE ***************
 import { ConnectDB } from './core/db.js';
+import { CreateAcademicYearLoader } from './loader/academic_year.loader.js';
 import { curriculumResolvers, curriculumTypeDefs, enrollmentResolvers, enrollmentTypeDefs } from './features/academic/index.js';
 import { DateScalar } from './shared/graphql/scalar.date.js';
 import { port } from './core/config.js';
@@ -40,6 +41,10 @@ const init = async () => {
       },
       Query: {
         ...systemResolvers.Query,
+        ...studentResolver.Query,
+      },
+      Student: {
+        ...studentResolver.Student,
       },
     },
   });
@@ -47,7 +52,19 @@ const init = async () => {
   // *************** END: Configure and start Apollo Server ***************
 
   // *************** START: Register application middleware ***************
-  app.use(cors()).use(json()).use('/graphql', expressMiddleware(server));
+  app
+    .use(cors())
+    .use(json())
+    .use(
+      '/graphql',
+      expressMiddleware(server, {
+        context: async () => {
+          return {
+            AcademicYearLoader: CreateAcademicYearLoader(),
+          };
+        },
+      }),
+    );
   // *************** END: Register application middleware ***************
 
   // *************** START: Expose HTTP server ***************

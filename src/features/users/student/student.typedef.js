@@ -8,8 +8,16 @@ type Student {
     last_name: String!
     email: String!
     student_number: String!
-    registration_date: Date!,
+    registration_date: Date!
     academic_year_ids: [ID!]!
+    academic_years: [AcademicYear!]!
+}
+
+type PaginatedStudentResponse {
+    total_count: Int!
+    current_page: Int!
+    total_pages: Int!
+    data: [Student]!
 }
 
 # *************** INPUT TYPES ***************
@@ -18,6 +26,17 @@ input CreateStudentInput {
     last_name: String!
     email: String!
     student_number: String!
+}
+
+input GetStudentsByAcademicYearInput {
+    academic_year_id: ID!
+    page: Int
+    limit: Int
+    search: String
+}
+
+type Query {
+    GetStudentsByAcademicYear(input: GetStudentsByAcademicYearInput!): PaginatedStudentResponse!
 }
 
 # *************** MUTATIONS ***************

@@ -1,4 +1,5 @@
 // *************** IMPORT MODULE ***************
+import mongoose from 'mongoose';
 import { AppError } from '../../../core/error.js';
 import { StudentModel as Students } from './student.model.js';
 
@@ -15,6 +16,7 @@ const CreateStudentHelper = async (input) => {
   const exist = await Students.findOne({
     $or: [{ email: input.email }, { student_number: input.student_number }],
   }).lean();
+
   if (exist) {
     throw new AppError('Student already exist', 'STUDENT_EXIST', 409);
   }
@@ -22,6 +24,7 @@ const CreateStudentHelper = async (input) => {
 
   // *************** START: Persist student creation ***************
   const student = await Students.create(input);
+
   if (!student) {
     throw new AppError('Failed to create student', 'CREATE_STUDENT_FAILED', 500);
   }
@@ -30,5 +33,45 @@ const CreateStudentHelper = async (input) => {
   // *************** END: Persist student creation ***************
 };
 
+/**
+ * Retrieves students enrolled in a specific academic year with pagination and optional search filtering.
+ * @param {object} input - Query payload containing filters and pagination options
+ * @returns {Promise<object>} Paginated list of students with metadata
+ */
+const GetStudentsByAcademicYearHelper = async (input) => {
+  const page = input.page || 1;
+  const limit = input.limit || 10;
+  const skip = (page - 1) * limit;
+
+  const query = {
+    academic_year_ids: { $eq: new mongoose.Types.ObjectId(input.academic_year_id) },
+  };
+
+  if (input.search) {
+    query.$or = [{ first_name: { $regex: input.search, $options: 'i' } }, { last_name: { $regex: input.search, $options: 'i' } }];
+  }
+
+  const students = await Students.aggregate([
+    { $match: query },
+    {
+      $facet: {
+        metadata: [{ $count: 'total' }],
+        data: [{ $skip: skip }, { $limit: limit }],
+      },
+    },
+  ]);
+
+  const total = students[0]?.metadata[0]?.total || 0;
+  const data = students[0]?.data || [];
+  const total_pages = Math.ceil(total / limit);
+
+  return {
+    total_count: total,
+    current_page: page,
+    total_pages,
+    data,
+  };
+};
+
 // *************** EXPORT MODULE ***************
-export { CreateStudentHelper };
+export { CreateStudentHelper, GetStudentsByAcademicYearHelper };
