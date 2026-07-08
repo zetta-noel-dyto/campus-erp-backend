@@ -24,14 +24,16 @@ const SubmitTestGradesHelper = async (input) => {
 
   // *************** START: Validate student references ***************
   // Extract student identifiers from submitted grade records for batch validation.
-  const studentIds = input.grades.map((item) => item.student_id);
+  const studentIds = input.grades.map((item) => String(item.student_id));
   // Fetch all referenced students in a single database query.
-  const students = await Students.find({ _id: { $in: studentIds } });
-  // Create lookup map to efficiently verify student existence during validation.
-  const studentMap = new Map(students.map((student) => [student._id.toString(), student]));
+  const students = await Students.find({ _id: { $in: studentIds } })
+    .select('_id')
+    .lean();
+  // Build a Set of existing student IDs for O(1) existence checks.
+  const studentExist = new Set(students.map((student) => String(student._id)));
   // Ensure every submitted grade references a valid student record.
   for (const item of input.grades) {
-    if (!studentMap.has(item.student_id)) {
+    if (!studentExist.has(item.student_id)) {
       throw new AppError('Student not found', 'INVALID_STUDENT_REFERENCE', 400);
     }
   }
