@@ -2,7 +2,7 @@
 import { CreateStudentHelper, GetStudentsByAcademicYearHelper } from './student.helper.js';
 import { CreateStudentSchema, GetStudentsByAcademicYearSchema } from './student.validator.js';
 import { NormalizeGqlError } from '../../../core/error.js';
-import { ValidateInput } from '../../academic/curriculum/curriculum.validator.js';
+import { ValidateInput } from '../../../shared/validators/validators.input.js';
 
 // *************** STUDENT RESOLVERS ***************
 /**

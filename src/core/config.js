@@ -17,6 +17,8 @@ const db = {
 // Application runtime port used by HTTP server
 const port = process.env.PORT;
 
+const jwt_secret = process.env.JWT_SECRET;
+
 // *************** VALIDATION ***************
 // Ensure critical environment variables exist before application starts
 if (!db.uri || !port) {
@@ -26,4 +28,4 @@ if (!db.uri || !port) {
 }
 
 // *************** EXPORT MODULE ***************
-export { db, port };
+export { db, jwt_secret, port };

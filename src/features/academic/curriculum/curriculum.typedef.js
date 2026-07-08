@@ -82,15 +82,15 @@ input UpdateTestInput {
 
 # *************** MUTATIONS ***************
 type Mutation {
-    CreateBlock(input: CreateBlockInput!): Block!
+    CreateBlock(input: CreateBlockInput!): Block! @auth(requires: admin)
     UpdateBlock(id: ID!, input: UpdateBlockInput!): Block!
     DeleteBlock(id: ID!): Block
 
-    CreateSubject(input: CreateSubjectInput!): Subject!
+    CreateSubject(input: CreateSubjectInput!): Subject! @auth(requires: admin)
     UpdateSubject(id: ID!, input: UpdateSubjectInput!): Subject!
     DeleteSubject(id: ID!): Subject
 
-    CreateTest(input: CreateTestInput!): Test!
+    CreateTest(input: CreateTestInput!): Test! @auth(requires: admin)
     UpdateTest(id: ID!, input: UpdateTestInput!): Test!
     DeleteTest(id: ID!): Test
 }

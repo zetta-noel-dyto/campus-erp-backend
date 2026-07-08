@@ -1,5 +1,5 @@
 // *************** IMPORT MODULE ***************
-import { NormalizeGqlError } from '../../../core/error.js';
+import { BlockModel as Blocks, SubjectModel as Subjects, TestModel as Tests } from './curriculum.model.js';
 import {
   checkEntityLock,
   CreateBlockHelper,
@@ -14,7 +14,6 @@ import {
   ValidateSubjectWeightage,
   ValidateTestWeightage,
 } from './curriculum.helper.js';
-import { BlockModel as Blocks, SubjectModel as Subjects, TestModel as Tests } from './curriculum.model.js';
 import {
   CreateBlockSchema,
   CreateSubjectSchema,
@@ -22,8 +21,9 @@ import {
   UpdateBlockSchema,
   UpdateSubjectSchema,
   UpdateTestSchema,
-  ValidateInput,
 } from './curriculum.validator.js';
+import { NormalizeGqlError } from '../../../core/error.js';
+import { ValidateInput } from '../../../shared/validators/validators.input.js';
 
 // *************** BLOCK RESOLVERS ***************
 /**

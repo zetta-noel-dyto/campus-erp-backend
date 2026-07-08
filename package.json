@@ -14,15 +14,25 @@
   "dependencies": {
     "@apollo/server": "^5.5.1",
     "@as-integrations/express5": "^1.1.2",
+    "@graphql-tools/schema": "^10.0.35",
+    "@graphql-tools/utils": "^11.2.0",
+    "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "dataloader": "^2.2.3",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "graphql": "^16.14.2",
     "joi": "^18.2.3",
+    "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.7.3"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
+  },
+  "allowScripts": {
+    "bcrypt@6.0.0": true,
+    "jsonwebtoken@9.0.3": true,
+    "@graphql-tools/utils@11.2.0": true,
+    "@graphql-tools/schema@10.0.35": true
   }
 }
