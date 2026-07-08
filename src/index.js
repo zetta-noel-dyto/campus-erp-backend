@@ -80,13 +80,11 @@ const init = async () => {
       '/graphql',
       expressMiddleware(server, {
         // Build GraphQL execution context with authenticated user data and request-level loaders.
-        context: async ({ req }) => {
-          return {
-            user: req.user,
-            // Initialize DataLoader instance to optimize academic year data fetching.
-            AcademicYearLoader: CreateAcademicYearLoader(),
-          };
-        },
+        context: ({ req }) => ({
+          user: req.user,
+          // Initialize DataLoader instance to optimize academic year data fetching.
+          AcademicYearLoader: CreateAcademicYearLoader(),
+        }),
       }),
     );
   // *************** END: Register application middleware ***************

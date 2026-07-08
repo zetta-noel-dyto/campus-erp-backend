@@ -54,13 +54,11 @@ const authDirectiveTransformer = (schema, directiveName) => {
         // Check whether the authenticated user's role matches the required directive role.
         const hasPermission = (() => {
           const role = context.user.role;
-
           if (requires === 'admin') return role === 'admin';
-          if (requires === 'teacher') return role === 'teacher' || role === 'admin';
+          if (requires === 'teacher') return role === 'teacher';
 
           return false;
         })();
-
         // Reject requests where the authenticated user does not have sufficient permission.
         if (!hasPermission) {
           throw new GraphQLError('Forbidden', {
