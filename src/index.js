@@ -11,7 +11,14 @@ import { AuthMiddleware } from './shared/middlewares/auth.middleware.js';
 import { authResolvers, authTypeDefs, studentResolver, studentTypeDefs } from './features/users/index.js';
 import { ConnectDB } from './core/db.js';
 import { CreateAcademicYearLoader } from './loader/academic_year.loader.js';
-import { curriculumResolvers, curriculumTypeDefs, enrollmentResolvers, enrollmentTypeDefs } from './features/academic/index.js';
+import {
+  curriculumResolvers,
+  curriculumTypeDefs,
+  enrollmentResolvers,
+  enrollmentTypeDefs,
+  gradingResolvers,
+  gradingTypeDefs,
+} from './features/academic/index.js';
 import { DateScalar } from './shared/graphql/scalar.date.js';
 import { port } from './core/config.js';
 import { systemResolvers, systemTypeDefs } from './features/system/index.js';
@@ -36,7 +43,16 @@ const init = async () => {
   // Combine all feature type definitions and resolvers into a single GraphQL schema.
   const schema = makeExecutableSchema({
     // Register GraphQL type definitions from authentication, academic, user, and system modules.
-    typeDefs: [authDirectiveTypeDefs, authTypeDefs, curriculumTypeDefs, dateTypeDefs, enrollmentTypeDefs, studentTypeDefs, systemTypeDefs],
+    typeDefs: [
+      authDirectiveTypeDefs,
+      authTypeDefs,
+      curriculumTypeDefs,
+      dateTypeDefs,
+      enrollmentTypeDefs,
+      gradingTypeDefs,
+      studentTypeDefs,
+      systemTypeDefs,
+    ],
 
     // Merge resolver implementations from each application module.
     resolvers: {
@@ -47,6 +63,7 @@ const init = async () => {
         ...authResolvers.Mutation,
         ...curriculumResolvers.Mutation,
         ...enrollmentResolvers.Mutation,
+        ...gradingResolvers.Mutation,
         ...studentResolver.Mutation,
       },
       // Combine all query operations exposed by the GraphQL API.
