@@ -31,9 +31,8 @@ const smtp = {
 };
 
 const email = {
-  teacher: process.env.TEACHER_EMAIL_ADDRESS,
-  admin: process.env.ADMIN_EMAIL_ADDRESS
-}
+  admin: process.env.ADMIN_EMAIL_ADDRESS,
+};
 
 // *************** VALIDATION ***************
 // Ensure critical environment variables exist before application starts

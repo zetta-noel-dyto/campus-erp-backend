@@ -4,11 +4,11 @@ import nodeCron from 'node-cron';
 // *************** IMPORT MODULE ***************
 import { AcademicYearModel as AcademicYears } from '../features/academic/enrollment/academic_year.model.js';
 import { AppError } from '../core/error.js';
-import { email } from '../core/config.js';
 import { NotificationLogModel } from '../features/system/notifications/notification_log.model.js';
 import { SendEmail } from '../shared/services/email.service.js';
 import { StudentModel as Students } from '../features/users/student/student.model.js';
 import { TestModel as Tests } from '../features/academic/curriculum/curriculum.model.js';
+import { UserModel as Users } from '../features/users/user/user.model.js';
 
 // *************** AGGREGATION PIPELINE ***************
 // Finds active academic records where enrolled students do not have corresponding test grades.
@@ -101,6 +101,11 @@ const MissingGradeAuditorJob = async () => {
     const results = await AcademicYears.aggregate(aggregation);
     // *************** END: Find missing grade records ***************
 
+    const teacher = await Users.findOne({ role: 'teacher' }).lean();
+    if (!teacher || !teacher.email) {
+      throw new AppError('The requested teacher does not exist or has incomplete information', 'TEACHER_NOT_FOUND', 404);
+    }
+
     // *************** START: Prepare related data lookup ***************
     // Extract identifiers required to fetch student and test information in batches.
     const studentIds = results.map((result) => result.student_id);
@@ -145,7 +150,7 @@ const MissingGradeAuditorJob = async () => {
     `;
 
       // Send notification email and record delivery history.
-      await SendEmail(email.teacher, 'Missing Grade Alert', html);
+      await SendEmail(teacher.email, 'Missing Grade Alert', html);
       // Store notification log to prevent duplicate email delivery.
       await NotificationLogModel.create({
         type: 'MISSING_GRADE_ALERT',
