@@ -2,7 +2,7 @@
 import jwt from 'jsonwebtoken';
 
 // *************** IMPORT MODULE ***************
-import { jwt_secret } from '../../core/config.js';
+import { jwtKey } from '../../core/config.js';
 
 // *************** MIDDLEWARE ***************
 /**
@@ -31,7 +31,7 @@ const AuthMiddleware = (req, res, next) => {
   // *************** START: Verify JWT token ***************
   try {
     // Verify token validity and decode user information stored in JWT payload.
-    const decoded = jwt.verify(token, jwt_secret);
+    const decoded = jwt.verify(token, jwtKey.secret);
 
     // Attach authenticated user payload to request for downstream middleware/resolver usage.
     req.user = decoded;

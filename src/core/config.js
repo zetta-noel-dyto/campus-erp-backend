@@ -1,5 +1,6 @@
 // *************** IMPORT LIBRARY ***************
 import dotenv from 'dotenv';
+
 // *************** IMPORT MODULE ***************
 import { AppError } from './error.js';
 
@@ -10,14 +11,24 @@ dotenv.config();
 // *************** GLOBAL VARIABLES ***************
 // Centralized configuration values loaded from environment variables
 const db = {
-  // MongoDB connection URI used by database layer to establish connection
   uri: process.env.MONGO_URI,
 };
 
 // Application runtime port used by HTTP server
 const port = process.env.PORT;
 
-const jwt_secret = process.env.JWT_SECRET;
+// JWT configuration used for generating and validating authentication tokens.
+const jwtKey = {
+  secret: process.env.JWT_SECRET,
+};
+
+// SMTP configuration used for sending application emails.
+const smtp = {
+  host: process.env.SMTP_HOST,
+  port: process.env.SMTP_PORT,
+  user: process.env.SMTP_USER,
+  pass: process.env.SMTP_PASS,
+};
 
 // *************** VALIDATION ***************
 // Ensure critical environment variables exist before application starts
@@ -28,4 +39,4 @@ if (!db.uri || !port) {
 }
 
 // *************** EXPORT MODULE ***************
-export { db, jwt_secret, port };
+export { db, jwtKey, port, smtp };
