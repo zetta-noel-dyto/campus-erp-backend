@@ -171,12 +171,10 @@ const MissingGradeAuditorJob = async () => {
  */
 const InitializeGradeAuditorJob = () => {
   // Schedule auditor execution every minute to monitor missing grades.
-  nodeCron
-    .schedule('* * * * *', async () => {
-      // Execute missing grade audit process.
-      await MissingGradeAuditorJob();
-    })
-    .catch((error) => console.log(error));
+  nodeCron.schedule('* * * * *', () => {
+    // Execute missing grade audit process.
+    MissingGradeAuditorJob().catch((error) => console.error(`Error executing MissingGradeAuditorJob : ${error}`));
+  });
 };
 
 // *************** EXPORT MODULE ***************
