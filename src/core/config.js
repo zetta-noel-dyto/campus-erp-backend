@@ -30,6 +30,11 @@ const smtp = {
   pass: process.env.SMTP_PASS,
 };
 
+const email = {
+  teacher: process.env.TEACHER_EMAIL_ADDRESS,
+  admin: process.env.ADMIN_EMAIL_ADDRESS
+}
+
 // *************** VALIDATION ***************
 // Ensure critical environment variables exist before application starts
 if (!db.uri || !port) {
@@ -39,4 +44,4 @@ if (!db.uri || !port) {
 }
 
 // *************** EXPORT MODULE ***************
-export { db, jwtKey, port, smtp };
+export { db, email, jwtKey, port, smtp };

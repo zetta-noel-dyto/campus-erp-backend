@@ -2,7 +2,7 @@
 import nodemailer from 'nodemailer';
 
 // *************** IMPORT MODULE ***************
-import { smtp } from '../../core/config.js';
+import { email, smtp } from '../../core/config.js';
 
 // *************** GLOBAL VARIABLES ***************
 const transporter = nodemailer.createTransport({
@@ -32,6 +32,7 @@ const transporter = nodemailer.createTransport({
 const SendEmail = async (to, subject, htmlBody) => {
   // *************** START: Send email notification ***************
   return await transporter.sendMail({
+    from: email.admin,
     to,
     subject,
     html: htmlBody,

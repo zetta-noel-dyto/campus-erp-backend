@@ -4,6 +4,7 @@ import nodeCron from 'node-cron';
 // *************** IMPORT MODULE ***************
 import { AcademicYearModel as AcademicYears } from '../features/academic/enrollment/academic_year.model.js';
 import { AppError } from '../core/error.js';
+import { email } from '../core/config.js';
 import { NotificationLogModel } from '../features/system/notifications/notification_log.model.js';
 import { SendEmail } from '../shared/services/email.service.js';
 import { StudentModel as Students } from '../features/users/student/student.model.js';
@@ -144,7 +145,7 @@ const MissingGradeAuditorJob = async () => {
     `;
 
       // Send notification email and record delivery history.
-      await SendEmail(student.email, 'Missing Grade Alert', html);
+      await SendEmail(email.teacher, 'Missing Grade Alert', html);
       // Store notification log to prevent duplicate email delivery.
       await NotificationLogModel.create({
         type: 'MISSING_GRADE_ALERT',
@@ -159,7 +160,6 @@ const MissingGradeAuditorJob = async () => {
   } catch (error) {
     // Log unexpected job failure before propagating error.
     console.error(error);
-
     throw error;
   }
 };
@@ -171,10 +171,12 @@ const MissingGradeAuditorJob = async () => {
  */
 const InitializeGradeAuditorJob = () => {
   // Schedule auditor execution every minute to monitor missing grades.
-  nodeCron.schedule('* * * * *', async () => {
-    // Execute missing grade audit process.
-    await MissingGradeAuditorJob();
-  });
+  nodeCron
+    .schedule('* * * * *', async () => {
+      // Execute missing grade audit process.
+      await MissingGradeAuditorJob();
+    })
+    .catch((error) => console.log(error));
 };
 
 // *************** EXPORT MODULE ***************
