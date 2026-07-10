@@ -10,21 +10,18 @@ const StudentGradeSchema = new Schema(
       ref: 'Student',
       required: true,
     },
-
     // Reference to the test associated with this student grade, uses ObjectId relation to the Test collection.
     test_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Test',
       required: true,
     },
-
     // Reference to the academic year context where this grade was recorded, uses ObjectId relation to the AcademicYear collection.
     academic_year_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'AcademicYear',
       required: true,
     },
-
     // Numerical score achieved by the student for the related test, value must be within the supported grading range from 0 to 100.
     score: {
       type: Number,

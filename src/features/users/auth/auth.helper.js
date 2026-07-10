@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 
 // *************** IMPORT MODULE ***************
 import { AppError } from '../../../core/error.js';
-import { jwt_secret } from '../../../core/config.js';
+import { jwtKey } from '../../../core/config.js';
 import { UserModel as Users } from '../user/user.model.js';
 
 // *************** HELPER FUNCTION ***************
@@ -39,7 +39,7 @@ const LoginHelper = async (input) => {
 
   // *************** START: Generate authentication token ***************
   // Create JWT token containing user identity and role information for future authorization checks.
-  return jwt.sign({ userId: user._id, role: user.role }, jwt_secret, { expiresIn: '8h' });
+  return jwt.sign({ userId: user._id, role: user.role }, jwtKey.secret, { expiresIn: '8h' });
   // *************** END: Generate authentication token ***************
 };
 

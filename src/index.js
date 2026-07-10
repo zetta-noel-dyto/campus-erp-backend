@@ -20,6 +20,7 @@ import {
   gradingTypeDefs,
 } from './features/academic/index.js';
 import { DateScalar } from './shared/graphql/scalar.date.js';
+import { InitializeGradeAuditorJob } from './jobs/missing_grades.job.js';
 import { port } from './core/config.js';
 import { systemResolvers, systemTypeDefs } from './features/system/index.js';
 import { typeDefs as dateTypeDefs } from './shared/graphql/scalar.date.typedef.js';
@@ -39,8 +40,11 @@ const init = async () => {
   await ConnectDB();
   // *************** END: Initialize database connection ***************
 
+  // *************** START: Initialize background jobs ***************
+  InitializeGradeAuditorJob();
+  // *************** END: Initialize background jobs ***************
+
   // *************** START: Build GraphQL executable schema ***************
-  // Combine all feature type definitions and resolvers into a single GraphQL schema.
   const schema = makeExecutableSchema({
     // Register GraphQL type definitions from authentication, academic, user, and system modules.
     typeDefs: [
