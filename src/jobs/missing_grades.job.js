@@ -103,7 +103,7 @@ const MissingGradeAuditorJob = async () => {
 
     const teacher = await Users.findOne({ role: 'teacher' }).lean();
     if (!teacher || !teacher.email) {
-      throw new AppError('The requested teacher does not exist or has incomplete information', 'TEACHER_NOT_FOUND', 404);
+      throw new AppError('The requested teacher does not exist or has incomplete information', 'TEACHER_NOT_FOUND_OR_INVALID', 404);
     }
 
     // *************** START: Prepare related data lookup ***************
@@ -113,9 +113,8 @@ const MissingGradeAuditorJob = async () => {
 
     // Fetch required student information for notification content generation.
     const students = await Students.find({ _id: { $in: studentIds } })
-      .select('first_name last_name email student_number')
+      .select('first_name last_name student_number')
       .lean();
-
     // Fetch required test information for notification content generation.
     const tests = await Tests.find({ _id: { $in: testIds } })
       .select('name')
