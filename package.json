@@ -22,11 +22,13 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "graphql": "^16.14.2",
+    "handlebars": "^4.7.9",
     "joi": "^18.2.3",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.7.3",
     "node-cron": "^4.6.0",
-    "nodemailer": "^9.0.3"
+    "nodemailer": "^9.0.3",
+    "puppeteer": "^25.3.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
@@ -36,6 +38,7 @@
     "jsonwebtoken@9.0.3": true,
     "@graphql-tools/utils@11.2.0": true,
     "@graphql-tools/schema@10.0.35": true,
-    "@apollo/protobufjs@1.2.8": true
+    "@apollo/protobufjs@1.2.8": true,
+    "puppeteer@25.3.0": true
   }
 }
