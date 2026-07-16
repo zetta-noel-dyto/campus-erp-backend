@@ -1,21 +1,27 @@
+// *************** IMPORT CORE ***************
+import fs from 'fs/promises';
+import path from 'path';
+
+// *************** IMPORT LIBRARY ***************
+import Handlebars from 'handlebars';
+
 // *************** IMPORT MODULE ***************
 import { AcademicStandingModel as AcademicStanding } from './academic_standing.model.js';
 import { AppError } from '../../../core/error.js';
 import { StudentModel as Students } from '../../users/student/student.model.js';
 
-// *************** HELPER FUNCTION ***************
+// *************** HELPER ***************
 /**
- * Retrieves student report card data including academic standing details and student information.
- * @param {Object} req - Express request object containing report card request parameters.
- * @param {Object} req.params - Route parameters containing academic year and student identifiers.
- * @param {string} req.params.academicYearId - Academic year identifier used to filter academic records.
- * @param {string} req.params.studentId - Student identifier used to retrieve student information.
- * @returns {Promise<Object>} Report card data containing academic standing and student details.
+ * Retrieves student report card data and generates HTML content from report card template.
+ * @param {Object} data - Report card request data containing required identifiers.
+ * @param {string} data.academicYearId - Academic year identifier used to filter academic records.
+ * @param {string} data.studentId - Student identifier used to retrieve student information.
+ * @returns {Promise<string>} Generated report card HTML content.
  * @throws {AppError} Throws error when academic standing data or student record does not exist.
  */
-const GetReportCardHelper = async (req) => {
+const GetReportCardHelper = async (data) => {
   // *************** START: Extract request parameters ***************
-  const { academicYearId, studentId } = req.params;
+  const { academicYearId, studentId } = data;
   // *************** END: Extract request parameters ***************
 
   // *************** START: Fetch academic standing data ***************
@@ -23,11 +29,7 @@ const GetReportCardHelper = async (req) => {
     academic_year_id: academicYearId,
     student_id: studentId,
   })
-    .populate([
-      { path: 'block_id', select: 'name' },
-      { path: 'subjects.subject_id', select: 'name' },
-      { path: 'subjects.tests.test_id', select: 'name' },
-    ])
+    .populate([{ path: 'block_id' }, { path: 'subjects.subject_id' }, { path: 'subjects.tests.test_id' }])
     .lean();
   // *************** END: Fetch academic standing data ***************
 
@@ -36,12 +38,23 @@ const GetReportCardHelper = async (req) => {
   // *************** END: Fetch student data ***************
 
   // *************** START: Validate report card data ***************
-  if (!academicStanding.length === 0 || !student) {
+  if (academicStanding.length === 0 || !student) {
     throw new AppError('Data not found', 'DATA_NOT_FOUND', 404);
   }
   // *************** END: Validate report card data ***************
 
-  return { academicStanding, student };
+  // *************** START: Load report card template ***************
+  const templatePath = path.join(process.cwd(), 'src', 'features', 'academic', 'grading', 'templates', 'report_card.hbs');
+  const source = await fs.readFile(templatePath, 'utf8');
+  const template = Handlebars.compile(source);
+  // *************** END: Load report card template ***************
+
+  // *************** START: Generate report card HTML ***************
+  return template({
+    student,
+    academicStanding,
+  });
+  // *************** END: Generate report card HTML ***************
 };
 
 // *************** EXPORT MODULE ***************

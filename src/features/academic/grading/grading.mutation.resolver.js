@@ -2,7 +2,7 @@
 import { NormalizeGqlError } from '../../../core/error.js';
 import { SubmitTestGradesHelper } from './grading.helper.js';
 import { SubmitTestGradesSchema } from './grading.validator.js';
-import { ValidateInput } from '../../../shared/validators/validators.input.js';
+import { ValidateInput } from '../../../shared/validators/input.validators.js';
 
 // *************** MUTATION ***************
 /**

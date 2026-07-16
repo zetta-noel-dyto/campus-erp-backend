@@ -14,12 +14,13 @@ let browserInstance = null;
  * @returns {Promise<void>} Resolves once browser instance is ready.
  */
 const InitializePDFService = async () => {
+  // *************** START: Initialize browser instance ***************
   if (browserInstance) return;
 
   browserInstance = await puppeteer.launch({
-    headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+    headless: true,
   });
+  // *************** END: Initialize browser instance ***************
 };
 
 // *************** PDF GENERATION ***************

@@ -11,7 +11,6 @@ import { TestModel as Tests } from '../features/academic/curriculum/curriculum.m
 import { UserModel as Users } from '../features/users/user/user.model.js';
 
 // *************** AGGREGATION PIPELINE ***************
-// Finds active academic records where enrolled students do not have corresponding test grades.
 const aggregation = [
   // Filter only active academic years for auditing.
   { $match: { status: 'active' } },
@@ -82,7 +81,7 @@ const aggregation = [
   },
 ];
 
-// *************** HELPER FUNCTION ***************
+// *************** HELPER ***************
 /**
  * Delays execution for the specified amount of time.
  * @param {number} ms - Delay duration in milliseconds.
@@ -90,7 +89,7 @@ const aggregation = [
  */
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// *************** JOB FUNCTION ***************
+// *************** JOB ***************
 /**
  * Checks for missing student grades and sends alert notifications.
  * @returns {Promise<void>}
@@ -107,27 +106,22 @@ const MissingGradeAuditorJob = async () => {
     }
 
     // *************** START: Prepare related data lookup ***************
-    // Extract identifiers required to fetch student and test information in batches.
     const studentIds = results.map((result) => result.student_id);
     const testIds = results.map((result) => result.test_id);
 
-    // Fetch required student information for notification content generation.
     const students = await Students.find({ _id: { $in: studentIds } })
       .select('first_name last_name student_number')
       .lean();
-    // Fetch required test information for notification content generation.
     const tests = await Tests.find({ _id: { $in: testIds } })
       .select('name')
       .lean();
 
-    // Create lookup maps to avoid repeated database queries during processing.
     const studentMap = new Map(students.map((student) => [String(student._id), student]));
     const testMap = new Map(tests.map((test) => [String(test._id), test]));
     // *************** END: Prepare related data lookup ***************
 
     // *************** START: Process missing grade notifications ***************
     for (const result of results) {
-      // Check whether notification has already been sent to prevent duplicate alerts.
       const exist = await NotificationLogModel.findOne({
         type: 'MISSING_GRADE_ALERT',
         student_id: result.student_id,
@@ -135,11 +129,9 @@ const MissingGradeAuditorJob = async () => {
       }).lean();
       if (exist) continue;
 
-      // Retrieve student and test details for notification message generation.
       const student = studentMap.get(String(result.student_id));
       const test = testMap.get(String(result.test_id));
 
-      // Generate notification email content containing missing grade information.
       const html = `
       <h3>Missing Grade Alert</h3>
       <p>
@@ -148,21 +140,17 @@ const MissingGradeAuditorJob = async () => {
       </p>
     `;
 
-      // Send notification email and record delivery history.
       await SendEmail(teacher.email, 'Missing Grade Alert', html);
-      // Store notification log to prevent duplicate email delivery.
       await NotificationLogModel.create({
         type: 'MISSING_GRADE_ALERT',
         student_id: result.student_id,
         test_id: result.test_id,
         academic_year_id: result.academic_year_id,
       });
-      // Slow down email delivery to respect external SMTP rate limits.
       await delay(11_000);
     }
     // *************** END: Process missing grade notifications ***************
   } catch (error) {
-    // Log unexpected job failure before propagating error.
     console.error(error);
     throw error;
   }
@@ -174,9 +162,7 @@ const MissingGradeAuditorJob = async () => {
  * @returns {void}
  */
 const InitializeGradeAuditorJob = () => {
-  // Schedule auditor execution every minute to monitor missing grades.
   nodeCron.schedule('* * * * *', () => {
-    // Execute missing grade audit process.
     MissingGradeAuditorJob().catch((error) => console.error(`Error executing MissingGradeAuditorJob : ${error}`));
   });
 };

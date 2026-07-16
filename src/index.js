@@ -20,6 +20,7 @@ import {
   gradingTypeDefs,
 } from './features/academic/index.js';
 import { DateScalar } from './shared/graphql/scalar.date.js';
+import { HandleApiError } from './core/error.js';
 import { InitializeGradeAuditorJob } from './jobs/missing_grades.job.js';
 import { InitializePDFService } from './shared/services/pdf.service.js';
 import { port } from './core/config.js';
@@ -38,11 +39,8 @@ const app = express();
  */
 const init = async () => {
   // *************** START: Initialize application dependencies ***************
-  // Establish database connection required by application modules.
   await ConnectDB();
-  // Initialize PDF generation service before handling incoming requests.
   await InitializePDFService();
-  // Start scheduled job for detecting missing student grades.
   InitializeGradeAuditorJob();
   // *************** END: Initialize application dependencies ***************
 
@@ -58,6 +56,7 @@ const init = async () => {
       studentTypeDefs,
       systemTypeDefs,
     ],
+
     resolvers: {
       Date: DateScalar,
       Mutation: {
@@ -76,8 +75,6 @@ const init = async () => {
       },
     },
   });
-
-  // Apply authorization directive middleware to protected GraphQL fields.
   const authTransformedSchema = authDirectiveTransformer(schema, 'auth');
   // *************** END: Build GraphQL executable schema ***************
 
@@ -97,14 +94,15 @@ const init = async () => {
     .use(
       '/graphql',
       expressMiddleware(server, {
-        // Build GraphQL execution context with authenticated user data and request-level loaders.
         context: ({ req }) => ({
           user: req.user,
-          // Initialize DataLoader instance to optimize academic year data fetching.
           AcademicYearLoader: CreateAcademicYearLoader(),
         }),
       }),
-    );
+    )
+    .use((err, req, res, next) => {
+      HandleApiError(res, err);
+    });
   // *************** END: Register application middleware ***************
 
   // *************** START: Expose HTTP server ***************
@@ -115,4 +113,5 @@ const init = async () => {
 };
 
 // *************** INITIALIZE APPLICATION ***************
+// Execute application bootstrap process.
 await init();
