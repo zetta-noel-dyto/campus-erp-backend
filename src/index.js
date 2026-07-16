@@ -56,7 +56,6 @@ const init = async () => {
       studentTypeDefs,
       systemTypeDefs,
     ],
-
     resolvers: {
       Date: DateScalar,
       Mutation: {

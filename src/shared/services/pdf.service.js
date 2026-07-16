@@ -55,10 +55,10 @@ const GeneratePDFStream = async (htmlContent) => {
     const pdfStream = Readable.fromWeb(webStream);
 
     const closePage = async () => {
-      if (page) {
-        await page.close();
-        page = null;
-      }
+      if (!page) return;
+      const currentPage = page;
+      page = null;
+      await currentPage.close();
     };
 
     pdfStream.on('end', closePage);
