@@ -19,14 +19,14 @@ import {
   gradingResolvers,
   gradingTypeDefs,
 } from './features/academic/index.js';
-import { DateScalar } from './shared/graphql/scalar.date.js';
+import { DateScalar } from './shared/graphql/date.graphql.scalar.js';
 import { HandleApiError } from './core/error.js';
 import { InitializeGradeAuditorJob } from './jobs/missing_grades.job.js';
 import { InitializePDFService } from './shared/services/pdf.service.js';
 import { port } from './core/config.js';
 import { router as gradingRestRouter } from './features/academic/grading/grading.rest.router.js';
 import { systemResolvers, systemTypeDefs } from './features/system/index.js';
-import { typeDefs as dateTypeDefs } from './shared/graphql/scalar.date.typedef.js';
+import { typeDefs as dateTypeDefs } from './shared/graphql/date.graphql.typedef.js';
 
 // *************** GLOBAL VARIABLES ***************
 const app = express();
@@ -112,5 +112,4 @@ const init = async () => {
 };
 
 // *************** INITIALIZE APPLICATION ***************
-// Execute application bootstrap process.
 await init();

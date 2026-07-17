@@ -34,6 +34,9 @@ const email = {
   admin: process.env.ADMIN_EMAIL_ADDRESS,
 };
 
+// Webhook endpoint used to send event notifications
+const webhookWarehouse = process.env.WEBHOOK_WAREHOUSE_URL;
+
 // *************** VALIDATION ***************
 // Ensure critical environment variables exist before application starts
 if (!db.uri || !port) {
@@ -43,4 +46,4 @@ if (!db.uri || !port) {
 }
 
 // *************** EXPORT MODULE ***************
-export { db, email, jwtKey, port, smtp };
+export { db, email, jwtKey, port, smtp, webhookWarehouse };
