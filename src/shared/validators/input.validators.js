@@ -18,9 +18,7 @@ const ValidateInput = (schema, payload, context = 'Validation') => {
 
   if (error) {
     const errors = error.details.map((detail) => ({
-      // Field path that failed validation
       field: detail.path.join('.'),
-      // Human-readable validation error message
       message: detail.message,
     }));
 

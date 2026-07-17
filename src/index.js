@@ -20,33 +20,32 @@ import {
   gradingTypeDefs,
 } from './features/academic/index.js';
 import { DateScalar } from './shared/graphql/scalar.date.js';
+import { HandleApiError } from './core/error.js';
 import { InitializeGradeAuditorJob } from './jobs/missing_grades.job.js';
+import { InitializePDFService } from './shared/services/pdf.service.js';
 import { port } from './core/config.js';
+import { router as gradingRestRouter } from './features/academic/grading/grading.rest.router.js';
 import { systemResolvers, systemTypeDefs } from './features/system/index.js';
 import { typeDefs as dateTypeDefs } from './shared/graphql/scalar.date.typedef.js';
 
 // *************** GLOBAL VARIABLES ***************
-// Express application instance used to register middleware and expose HTTP endpoints
 const app = express();
 
 /**
  * Orchestrates systemic asynchronous application bootstrap phases including storage layer hydration and network exposure.
- * Initializes the database connection, starts the GraphQL server,
+ * Initializes the database connection, starts application services, starts the GraphQL server,
  * registers middleware, and begins listening for incoming requests.
- * @returns {Promise<void>} Resolves once the database cluster and GraphQL transport layers achieve full operational readiness
+ * @returns {Promise<void>} Resolves once the database cluster and application transport layers achieve full operational readiness.
  */
 const init = async () => {
-  // *************** START: Initialize database connection ***************
+  // *************** START: Initialize application dependencies ***************
   await ConnectDB();
-  // *************** END: Initialize database connection ***************
-
-  // *************** START: Initialize background jobs ***************
+  await InitializePDFService();
   InitializeGradeAuditorJob();
-  // *************** END: Initialize background jobs ***************
+  // *************** END: Initialize application dependencies ***************
 
   // *************** START: Build GraphQL executable schema ***************
   const schema = makeExecutableSchema({
-    // Register GraphQL type definitions from authentication, academic, user, and system modules.
     typeDefs: [
       authDirectiveTypeDefs,
       authTypeDefs,
@@ -57,12 +56,8 @@ const init = async () => {
       studentTypeDefs,
       systemTypeDefs,
     ],
-
-    // Merge resolver implementations from each application module.
     resolvers: {
-      // Register custom scalar resolver for date-related fields.
       Date: DateScalar,
-      // Combine all mutation operations exposed by the GraphQL API.
       Mutation: {
         ...authResolvers.Mutation,
         ...curriculumResolvers.Mutation,
@@ -70,18 +65,15 @@ const init = async () => {
         ...gradingResolvers.Mutation,
         ...studentResolver.Mutation,
       },
-      // Combine all query operations exposed by the GraphQL API.
       Query: {
         ...systemResolvers.Query,
         ...studentResolver.Query,
       },
-      // Register field-level resolvers for Student object type.
       Student: {
         ...studentResolver.Student,
       },
     },
   });
-  // Apply authorization directive middleware to protected GraphQL fields.
   const authTransformedSchema = authDirectiveTransformer(schema, 'auth');
   // *************** END: Build GraphQL executable schema ***************
 
@@ -97,17 +89,19 @@ const init = async () => {
     .use(cors())
     .use(json())
     .use(AuthMiddleware)
+    .use('/api/academics', gradingRestRouter)
     .use(
       '/graphql',
       expressMiddleware(server, {
-        // Build GraphQL execution context with authenticated user data and request-level loaders.
         context: ({ req }) => ({
           user: req.user,
-          // Initialize DataLoader instance to optimize academic year data fetching.
           AcademicYearLoader: CreateAcademicYearLoader(),
         }),
       }),
-    );
+    )
+    .use((err, req, res, next) => {
+      HandleApiError(res, err);
+    });
   // *************** END: Register application middleware ***************
 
   // *************** START: Expose HTTP server ***************
@@ -118,4 +112,5 @@ const init = async () => {
 };
 
 // *************** INITIALIZE APPLICATION ***************
+// Execute application bootstrap process.
 await init();

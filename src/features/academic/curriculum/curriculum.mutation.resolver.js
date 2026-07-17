@@ -23,7 +23,7 @@ import {
   UpdateTestSchema,
 } from './curriculum.validator.js';
 import { NormalizeGqlError } from '../../../core/error.js';
-import { ValidateInput } from '../../../shared/validators/validators.input.js';
+import { ValidateInput } from '../../../shared/validators/input.validators.js';
 
 // *************** BLOCK RESOLVERS ***************
 /**
