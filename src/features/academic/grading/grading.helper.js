@@ -65,7 +65,7 @@ const SubmitTestGradesHelper = async (input) => {
     academic_year_id: input.academic_year_id,
   });
 
-  const worker = new Worker(path.resolve(dirname, '../../../worker/grade_aggregator/grade_aggregator.worker.js'), {
+  const worker = new Worker(path.resolve(dirname, '../../../worker/grade_aggregator.worker.js'), {
     workerData: payload,
   });
   worker
