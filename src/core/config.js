@@ -34,13 +34,14 @@ const email = {
   admin: process.env.ADMIN_EMAIL_ADDRESS,
 };
 
+// Webhook endpoint used to send event notifications
+const webhookWarehouse = process.env.WEBHOOK_WAREHOUSE_URL;
+
 // *************** VALIDATION ***************
 // Ensure critical environment variables exist before application starts
-if (!db.uri || !port) {
-  // Throws structured application error when required environment config is missing
+if (!db.uri || !port || !webhookWarehouse || !/^https?:\/\/.+/.test(webhookWarehouse)) {
   throw new AppError('Missing required env variables', 'ENV_ERROR', 500);
-  process.exit(1);
 }
 
 // *************** EXPORT MODULE ***************
-export { db, email, jwtKey, port, smtp };
+export { db, email, jwtKey, port, smtp, webhookWarehouse };

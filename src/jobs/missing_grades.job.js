@@ -95,44 +95,44 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
  * @returns {Promise<void>}
  */
 const MissingGradeAuditorJob = async () => {
-  try {
-    // *************** START: Find missing grade records ***************
-    const results = await AcademicYears.aggregate(aggregation);
-    // *************** END: Find missing grade records ***************
+  // *************** START: Find missing grade records ***************
+  const results = await AcademicYears.aggregate(aggregation);
+  if (!results.length) return;
+  // *************** END: Find missing grade records ***************
 
-    const teacher = await Users.findOne({ role: 'teacher' }).lean();
-    if (!teacher || !teacher.email) {
-      throw new AppError('The requested teacher does not exist or has incomplete information', 'TEACHER_NOT_FOUND_OR_INVALID', 404);
-    }
+  const teacher = await Users.findOne({ role: 'teacher' }).lean();
+  if (!teacher || !teacher.email) {
+    throw new AppError('The requested teacher does not exist or has incomplete information', 'TEACHER_NOT_FOUND_OR_INVALID', 404);
+  }
 
-    // *************** START: Prepare related data lookup ***************
-    const studentIds = results.map((result) => result.student_id);
-    const testIds = results.map((result) => result.test_id);
+  // *************** START: Prepare related data lookup ***************
+  const studentIds = results.map((result) => result.student_id);
+  const testIds = results.map((result) => result.test_id);
 
-    const students = await Students.find({ _id: { $in: studentIds } })
-      .select('first_name last_name student_number')
-      .lean();
-    const tests = await Tests.find({ _id: { $in: testIds } })
-      .select('name')
-      .lean();
+  const students = await Students.find({ _id: { $in: studentIds } })
+    .select('first_name last_name student_number')
+    .lean();
+  const tests = await Tests.find({ _id: { $in: testIds } })
+    .select('name')
+    .lean();
 
-    const studentMap = new Map(students.map((student) => [String(student._id), student]));
-    const testMap = new Map(tests.map((test) => [String(test._id), test]));
-    // *************** END: Prepare related data lookup ***************
+  const studentMap = new Map(students.map((student) => [String(student._id), student]));
+  const testMap = new Map(tests.map((test) => [String(test._id), test]));
+  // *************** END: Prepare related data lookup ***************
 
-    // *************** START: Process missing grade notifications ***************
-    for (const result of results) {
-      const exist = await NotificationLogModel.findOne({
-        type: 'MISSING_GRADE_ALERT',
-        student_id: result.student_id,
-        test_id: result.test_id,
-      }).lean();
-      if (exist) continue;
+  // *************** START: Process missing grade notifications ***************
+  for (const result of results) {
+    const exist = await NotificationLogModel.findOne({
+      type: 'MISSING_GRADE_ALERT',
+      student_id: result.student_id,
+      test_id: result.test_id,
+    }).lean();
+    if (exist) continue;
 
-      const student = studentMap.get(String(result.student_id));
-      const test = testMap.get(String(result.test_id));
+    const student = studentMap.get(String(result.student_id));
+    const test = testMap.get(String(result.test_id));
 
-      const html = `
+    const html = `
       <h3>Missing Grade Alert</h3>
       <p>
         Student ${student.first_name} ${student.last_name} with student number ${student.student_number}
@@ -140,20 +140,16 @@ const MissingGradeAuditorJob = async () => {
       </p>
     `;
 
-      await SendEmail(teacher.email, 'Missing Grade Alert', html);
-      await NotificationLogModel.create({
-        type: 'MISSING_GRADE_ALERT',
-        student_id: result.student_id,
-        test_id: result.test_id,
-        academic_year_id: result.academic_year_id,
-      });
-      await delay(11_000);
-    }
-    // *************** END: Process missing grade notifications ***************
-  } catch (error) {
-    console.error(error);
-    throw error;
+    await SendEmail(teacher.email, 'Missing Grade Alert', html);
+    await NotificationLogModel.create({
+      type: 'MISSING_GRADE_ALERT',
+      student_id: result.student_id,
+      test_id: result.test_id,
+      academic_year_id: result.academic_year_id,
+    });
+    await delay(11_000);
   }
+  // *************** END: Process missing grade notifications ***************
 };
 
 // *************** JOB INITIALIZER ***************
@@ -162,8 +158,12 @@ const MissingGradeAuditorJob = async () => {
  * @returns {void}
  */
 const InitializeGradeAuditorJob = () => {
-  nodeCron.schedule('* * * * *', () => {
-    MissingGradeAuditorJob().catch((error) => console.error(`Error executing MissingGradeAuditorJob : ${error}`));
+  nodeCron.schedule('* * * * *', async () => {
+    try {
+      await MissingGradeAuditorJob();
+    } catch (error) {
+      console.error('Error executing grade auditor job', error);
+    }
   });
 };
 
