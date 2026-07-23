@@ -1,5 +1,5 @@
 // *************** IMPORT LIBRARY ***************
-import { GraphQLError } from 'graphql';
+import { GraphQLError } from 'graphql'
 
 // *************** ERROR CLASS ***************
 /**
@@ -10,9 +10,9 @@ import { GraphQLError } from 'graphql';
  */
 class AppError extends Error {
   constructor(message, code, httpStatus) {
-    super(message);
-    this.code = code;
-    this.httpStatus = httpStatus;
+    super(message)
+    this.code = code
+    this.httpStatus = httpStatus
   }
 }
 
@@ -25,7 +25,7 @@ class AppError extends Error {
 const NormalizeGqlError = (error) => {
   // *************** START: Preserve GraphQL errors ***************
   if (error instanceof GraphQLError) {
-    throw error;
+    throw error
   }
   // *************** END: Preserve GraphQL errors ***************
 
@@ -35,18 +35,18 @@ const NormalizeGqlError = (error) => {
       extensions: {
         code: error.code,
         ...(error.httpStatus && { http: { status: error.httpStatus } }),
-        ...(error.meta && { meta: error.meta }),
-      },
-    });
+        ...(error.meta && { meta: error.meta })
+      }
+    })
   }
   // *************** END: Transform application errors ***************
 
   // *************** START: Handle unknown errors ***************
   return new GraphQLError('An internal server error occured', {
-    extensions: { code: 'INTERNAL_SERVER_ERROR', http: { status: 500 } },
-  });
+    extensions: { code: 'INTERNAL_SERVER_ERROR', http: { status: 500 } }
+  })
   // *************** END: Handle unknown errors ***************
-};
+}
 
 // *************** REST API ERROR HANDLER ***************
 /**
@@ -62,8 +62,8 @@ const HandleApiError = (res, error) => {
       status: 'fail',
       code: error.code,
       message: error.message,
-      ...(error.meta && { meta: error.meta }),
-    });
+      ...(error.meta && { meta: error.meta })
+    })
   }
   // *************** END: Handle known application errors ***************
 
@@ -71,10 +71,10 @@ const HandleApiError = (res, error) => {
   return res.status(500).json({
     status: 'error',
     code: 'INTERNAL_SERVER_ERROR',
-    message: 'An internal server error occured',
-  });
+    message: 'An internal server error occured'
+  })
   // *************** END: Handle unknown errors ***************
-};
+}
 
 // *************** EXPORT MODULE ***************
-export { AppError, HandleApiError, NormalizeGqlError };
+export { AppError, HandleApiError, NormalizeGqlError }

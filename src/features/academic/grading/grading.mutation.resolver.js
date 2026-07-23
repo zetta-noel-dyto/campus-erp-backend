@@ -1,8 +1,8 @@
 // *************** IMPORT MODULE ***************
-import { NormalizeGqlError } from '../../../core/error.js';
-import { SubmitTestGradesHelper } from './grading.helper.js';
-import { SubmitTestGradesSchema } from './grading.validator.js';
-import { ValidateInput } from '../../../shared/validators/input.validators.js';
+import { NormalizeGqlError } from '../../../core/error.js'
+import { SubmitTestGradesHelper } from './grading.helper.js'
+import { SubmitTestGradesSchema } from './grading.validator.js'
+import { ValidateInput } from '../../../shared/validators/input.validators.js'
 
 // *************** MUTATION ***************
 /**
@@ -16,22 +16,22 @@ import { ValidateInput } from '../../../shared/validators/input.validators.js';
 const SubmitTestGrades = async (_, { input }) => {
   try {
     // *************** START: Validate grade submission payload ***************
-    const data = ValidateInput(SubmitTestGradesSchema, input);
+    const data = ValidateInput(SubmitTestGradesSchema, input)
     // *************** END: Validate grade submission payload ***************
 
     // *************** START: Submit student grades ***************
-    return await SubmitTestGradesHelper(data);
+    return await SubmitTestGradesHelper(data)
     // *************** END: Submit student grades ***************
   } catch (error) {
-    throw NormalizeGqlError(error);
+    throw NormalizeGqlError(error)
   }
-};
+}
 
 // *************** EXPORT MODULE ***************
 const resolver = {
   Mutation: {
-    SubmitTestGrades,
-  },
-};
+    SubmitTestGrades
+  }
+}
 
-export { resolver };
+export { resolver }

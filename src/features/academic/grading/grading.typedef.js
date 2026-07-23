@@ -1,5 +1,4 @@
 // *************** GLOBAL VARIABLES ***************
-// GraphQL schema definitions for student grade data and grade submission operations.
 const typeDefs = `#graphql
 # *************** OBJECT TYPES ***************
 type StudentGrade {
@@ -26,7 +25,7 @@ input SubmitTestGradesInput {
 type Mutation {
     SubmitTestGrades(input: SubmitTestGradesInput!): [StudentGrade!]! @auth(requires: teacher)
 }
-`;
+`
 
 // *************** EXPORT MODULE ***************
-export { typeDefs };
+export { typeDefs }

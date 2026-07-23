@@ -1,11 +1,11 @@
 // *************** IMPORT LIBRARY ***************
-import mongoose from 'mongoose';
+import mongoose from 'mongoose'
 
 // *************** IMPORT MODULE ***************
-import { AppError } from '../../../core/error.js';
-import { BlockModel as Blocks } from './curriculum.model.js';
-import { SubjectModel as Subjects } from './curriculum.model.js';
-import { TestModel as Tests } from './curriculum.model.js';
+import { AppError } from '../../../core/error.js'
+import { BlockModel as Blocks } from './curriculum.model.js'
+import { SubjectModel as Subjects } from './curriculum.model.js'
+import { TestModel as Tests } from './curriculum.model.js'
 
 // *************** BLOCK HELPERS ***************
 /**
@@ -15,18 +15,18 @@ import { TestModel as Tests } from './curriculum.model.js';
  * @returns {Promise<object>} The created block document
  */
 const CreateBlockHelper = async (input) => {
-  const exist = await Blocks.findOne({ name: input.name }).lean();
+  const exist = await Blocks.findOne({ name: input.name }).lean()
   if (exist) {
-    throw new AppError('Block already exist', 'BLOCK_EXIST', 409);
+    throw new AppError('Block already exist', 'BLOCK_EXIST', 409)
   }
 
-  const block = await Blocks.create(input);
+  const block = await Blocks.create(input)
   if (!block) {
-    throw new AppError('Failed to create block', 'CREATE_BLOCK_FAILED', 500);
+    throw new AppError('Failed to create block', 'CREATE_BLOCK_FAILED', 500)
   }
 
-  return block;
-};
+  return block
+}
 
 /**
  * Modifies fields of an existing academic block after verifying name uniqueness.
@@ -36,23 +36,23 @@ const CreateBlockHelper = async (input) => {
  * @returns {Promise<object>} The mutated block document
  */
 const UpdateBlockHelper = async (id, input) => {
-  const exist = await Blocks.findById(id).lean();
+  const exist = await Blocks.findById(id).lean()
   if (!exist) {
-    throw new AppError('Block not found', 'BLOCK_NOT_FOUND', 404);
+    throw new AppError('Block not found', 'BLOCK_NOT_FOUND', 404)
   }
 
-  const check = await Blocks.findOne({ name: input.name, _id: { $ne: id } }).lean();
+  const check = await Blocks.findOne({ name: input.name, _id: { $ne: id } }).lean()
   if (check) {
-    throw new AppError('Block already exist', 'BLOCK_EXIST', 409);
+    throw new AppError('Block already exist', 'BLOCK_EXIST', 409)
   }
 
-  const block = await Blocks.findByIdAndUpdate(id, input, { new: true });
+  const block = await Blocks.findByIdAndUpdate(id, input, { new: true })
   if (!block) {
-    throw new AppError('Failed to update block', 'UPDATE_BLOCK_FAILED', 500);
+    throw new AppError('Failed to update block', 'UPDATE_BLOCK_FAILED', 500)
   }
 
-  return block;
-};
+  return block
+}
 
 /**
  * Removes an academic block after verifying it has no child subject relations.
@@ -61,19 +61,19 @@ const UpdateBlockHelper = async (id, input) => {
  * @returns {Promise<object>} The deleted block document pre-destruction
  */
 const DeleteBlockHelper = async (id) => {
-  const block = await Blocks.findById(id).lean();
+  const block = await Blocks.findById(id).lean()
   if (!block) {
-    throw new AppError('Block not found', 'BLOCK_NOT_FOUND', 404);
+    throw new AppError('Block not found', 'BLOCK_NOT_FOUND', 404)
   }
 
-  const subjects = await Subjects.exists({ block_id: id });
+  const subjects = await Subjects.exists({ block_id: id })
   if (subjects) {
-    throw new AppError('Cannot delete block with existing subjects', 'BLOCK_HAS_CHILDREN', 409);
+    throw new AppError('Cannot delete block with existing subjects', 'BLOCK_HAS_CHILDREN', 409)
   }
 
-  await Blocks.findByIdAndDelete(id);
-  return block;
-};
+  await Blocks.findByIdAndDelete(id)
+  return block
+}
 
 // *************** SUBJECT HELPERS ***************
 /**
@@ -83,23 +83,23 @@ const DeleteBlockHelper = async (id) => {
  * @returns {Promise<object>} The created subject document
  */
 const CreateSubjectHelper = async (input) => {
-  const block = await Blocks.findById(input.block_id).lean();
+  const block = await Blocks.findById(input.block_id).lean()
   if (!block) {
-    throw new AppError('Block not found', 'BLOCK_NOT_FOUND', 404);
+    throw new AppError('Block not found', 'BLOCK_NOT_FOUND', 404)
   }
 
-  const exist = await Subjects.findOne({ name: input.name }).lean();
+  const exist = await Subjects.findOne({ name: input.name }).lean()
   if (exist) {
-    throw new AppError('Subject already exist', 'SUBJECT_EXIST', 409);
+    throw new AppError('Subject already exist', 'SUBJECT_EXIST', 409)
   }
 
-  const subject = await Subjects.create(input);
+  const subject = await Subjects.create(input)
   if (!subject) {
-    throw new AppError('Failed to create subject', 'CREATE_SUBJECT_FAILED', 500);
+    throw new AppError('Failed to create subject', 'CREATE_SUBJECT_FAILED', 500)
   }
 
-  return subject;
-};
+  return subject
+}
 
 /**
  * Modifies an existing subject descriptor after ensuring name parameters are unique.
@@ -110,54 +110,54 @@ const CreateSubjectHelper = async (input) => {
  */
 const UpdateSubjectHelper = async (id, input) => {
   // *************** START: Validate subject existence ***************
-  const exist = await Subjects.findById(id).lean();
+  const exist = await Subjects.findById(id).lean()
   if (!exist) {
-    throw new AppError('Subject not found', 'SUBJECT_NOT_FOUND', 404);
+    throw new AppError('Subject not found', 'SUBJECT_NOT_FOUND', 404)
   }
   // *************** END: Validate subject existence ***************
 
   // *************** START: Validate subject name uniqueness ***************
   if (input.name) {
-    const check = await Subjects.findOne({ name: input.name, _id: { $ne: id } }).lean();
+    const check = await Subjects.findOne({ name: input.name, _id: { $ne: id } }).lean()
     if (check) {
-      throw new AppError('Subject already exist', 'SUBJECT_EXIST', 409);
+      throw new AppError('Subject already exist', 'SUBJECT_EXIST', 409)
     }
   }
   // *************** END: Validate subject name uniqueness ***************
 
   // *************** START: Validate destination block ***************
-  // Ensure the target block exists when moving the subject to another block
   if (input.block_id && input.block_id.toString() !== exist.block_id.toString()) {
-    const block = await Blocks.findById(input.block_id).lean();
+    const block = await Blocks.findById(input.block_id).lean()
     if (!block) {
-      throw new AppError('Block not found', 'BLOCK_NOT_FOUND', 404);
+      throw new AppError('Block not found', 'BLOCK_NOT_FOUND', 404)
     }
   }
   // *************** END: Validate destination block ***************
 
   // *************** START: Validate cumulative subject weightage ***************
-  // Calculate the resulting total weightage after applying the requested update
-  const targetBlockID = input.block_id ?? exist.block_id;
-  const incomingWeightage = input.weightage ?? exist.weightage;
+  const targetBlockID = input.block_id ?? exist.block_id
+  const incomingWeightage = input.weightage ?? exist.weightage
 
-  const subjects = await Subjects.find({ block_id: targetBlockID }).lean();
+  const subjects = await Subjects.find({ block_id: targetBlockID }).lean()
   let total =
-    subjects.filter((subject) => subject._id.toString() !== id).reduce((acc, subject) => acc + subject.weightage, 0) + incomingWeightage;
-  total = Number(total.toFixed(2));
+    subjects
+      .filter((subject) => subject._id.toString() !== id)
+      .reduce((acc, subject) => acc + subject.weightage, 0) + incomingWeightage
+  total = Number(total.toFixed(2))
   if (total > 100) {
-    throw new AppError('Subject weightage exceeds 100', 'WEIGHTAGE_LIMIT_EXCEEDED', 400);
+    throw new AppError('Subject weightage exceeds 100', 'WEIGHTAGE_LIMIT_EXCEEDED', 400)
   }
   // *************** END: Validate cumulative subject weightage ***************
 
   // *************** START: Persist subject update ***************
-  const subject = await Subjects.findByIdAndUpdate(id, input, { new: true });
+  const subject = await Subjects.findByIdAndUpdate(id, input, { new: true })
   if (!subject) {
-    throw new AppError('Failed to update subject', 'UPDATE_SUBJECT_FAILED', 500);
+    throw new AppError('Failed to update subject', 'UPDATE_SUBJECT_FAILED', 500)
   }
 
-  return subject;
+  return subject
   // *************** END: Persist subject update ***************
-};
+}
 
 /**
  * Removes an existing subject item after verifying it contains no child test entities.
@@ -166,19 +166,19 @@ const UpdateSubjectHelper = async (id, input) => {
  * @returns {Promise<object>} The deleted subject document pre-destruction
  */
 const DeleteSubjectHelper = async (id) => {
-  const subject = await Subjects.findById(id);
+  const subject = await Subjects.findById(id)
   if (!subject) {
-    throw new AppError('Subject not found', 'SUBJECT_NOT_FOUND', 404);
+    throw new AppError('Subject not found', 'SUBJECT_NOT_FOUND', 404)
   }
 
-  const tests = await Tests.exists({ subject_id: id });
+  const tests = await Tests.exists({ subject_id: id })
   if (tests) {
-    throw new AppError('Cannot delete subject with existing tests', 'SUBJECT_HAS_CHILDREN', 409);
+    throw new AppError('Cannot delete subject with existing tests', 'SUBJECT_HAS_CHILDREN', 409)
   }
 
-  await Subjects.findByIdAndDelete(id);
-  return subject;
-};
+  await Subjects.findByIdAndDelete(id)
+  return subject
+}
 
 // *************** TEST HELPERS ***************
 /**
@@ -188,23 +188,23 @@ const DeleteSubjectHelper = async (id) => {
  * @returns {Promise<object>} The created test document
  */
 const CreateTestHelper = async (input) => {
-  const subject = await Subjects.findById(input.subject_id).lean();
+  const subject = await Subjects.findById(input.subject_id).lean()
   if (!subject) {
-    throw new AppError('Subject not found', 'SUBJECT_NOT_FOUND', 404);
+    throw new AppError('Subject not found', 'SUBJECT_NOT_FOUND', 404)
   }
 
-  const exist = await Tests.findOne({ name: input.name }).lean();
+  const exist = await Tests.findOne({ name: input.name }).lean()
   if (exist) {
-    throw new AppError('Test already exist', 'TEST_EXIST', 409);
+    throw new AppError('Test already exist', 'TEST_EXIST', 409)
   }
 
-  const test = await Tests.create(input);
+  const test = await Tests.create(input)
   if (!test) {
-    throw new AppError('Failed to create test', 'CREATE_TEST_FAILED', 500);
+    throw new AppError('Failed to create test', 'CREATE_TEST_FAILED', 500)
   }
 
-  return test;
-};
+  return test
+}
 
 /**
  * Updates parameters on an existing test item following name identity verification.
@@ -215,53 +215,54 @@ const CreateTestHelper = async (input) => {
  */
 const UpdateTestHelper = async (id, input) => {
   // *************** START: Validate test existence ***************
-  const exist = await Tests.findById(id).lean();
+  const exist = await Tests.findById(id).lean()
   if (!exist) {
-    throw new AppError('Test not found', 'TEST_NOT_FOUND', 404);
+    throw new AppError('Test not found', 'TEST_NOT_FOUND', 404)
   }
   // *************** END: Validate test existence ***************
 
   // *************** START: Validate test name uniqueness ***************
   if (input.name) {
-    const check = await Tests.findOne({ name: input.name, _id: { $ne: id } }).lean();
+    const check = await Tests.findOne({ name: input.name, _id: { $ne: id } }).lean()
     if (check) {
-      throw new AppError('Test already exist', 'TEST_EXIST', 409);
+      throw new AppError('Test already exist', 'TEST_EXIST', 409)
     }
   }
   // *************** END: Validate test name uniqueness ***************
 
   // *************** START: Validate destination subject ***************
-  // Ensure the target subject exists when moving the test to another subject
   if (input.subject_id && input.subject_id.toString() !== exist.subject_id.toString()) {
-    const subject = await Subjects.findById(input.subject_id).lean();
+    const subject = await Subjects.findById(input.subject_id).lean()
     if (!subject) {
-      throw new AppError('Subject not found', 'SUBJECT_NOT_FOUND', 404);
+      throw new AppError('Subject not found', 'SUBJECT_NOT_FOUND', 404)
     }
   }
   // *************** END: Validate destination subject ***************
 
   // *************** START: Validate cumulative test weightage ***************
-  // Calculate the resulting total weightage after applying the requested update
-  const targetSubjectID = input.subject_id ?? exist.subject_id;
-  const incomingWeightage = input.weightage ?? exist.weightage;
+  const targetSubjectID = input.subject_id ?? exist.subject_id
+  const incomingWeightage = input.weightage ?? exist.weightage
 
-  const tests = await Tests.find({ subject_id: targetSubjectID }).lean();
-  let total = tests.filter((test) => test._id.toString() !== id).reduce((acc, test) => acc + test.weightage, 0) + incomingWeightage;
-  total = Number(total.toFixed(2));
+  const tests = await Tests.find({ subject_id: targetSubjectID }).lean()
+  let total =
+    tests
+      .filter((test) => test._id.toString() !== id)
+      .reduce((acc, test) => acc + test.weightage, 0) + incomingWeightage
+  total = Number(total.toFixed(2))
   if (total > 100) {
-    throw new AppError('Test weightage exceeds 100', 'WEIGHTAGE_LIMIT_EXCEEDED', 400);
+    throw new AppError('Test weightage exceeds 100', 'WEIGHTAGE_LIMIT_EXCEEDED', 400)
   }
   // *************** END: Validate cumulative test weightage ***************
 
   // *************** START: Persist test update ***************
-  const test = await Tests.findByIdAndUpdate(id, input, { new: true });
+  const test = await Tests.findByIdAndUpdate(id, input, { new: true })
   if (!test) {
-    throw new AppError('Failed to update test', 'UPDATE_TEST_FAILED', 500);
+    throw new AppError('Failed to update test', 'UPDATE_TEST_FAILED', 500)
   }
 
-  return test;
+  return test
   // *************** END: Persist test update ***************
-};
+}
 
 /**
  * Removes an individual test node from database storage tracking directly.
@@ -270,14 +271,14 @@ const UpdateTestHelper = async (id, input) => {
  * @returns {Promise<object>} The wiped test document parameters
  */
 const DeleteTestHelper = async (id) => {
-  const test = await Tests.findById(id).lean();
+  const test = await Tests.findById(id).lean()
   if (!test) {
-    throw new AppError('Test not found', 'TEST_NOT_FOUND', 404);
+    throw new AppError('Test not found', 'TEST_NOT_FOUND', 404)
   }
 
-  await Tests.findByIdAndDelete(id);
-  return test;
-};
+  await Tests.findByIdAndDelete(id)
+  return test
+}
 
 // *************** VALIDATORS ***************
 /**
@@ -287,15 +288,15 @@ const DeleteTestHelper = async (id) => {
  * @throws {AppError} 400 if aggregate weight breaches 100% threshold
  */
 const ValidateSubjectWeightage = async (block_id, incomingWeightage) => {
-  const subjects = await Subjects.find({ block_id }).lean();
+  const subjects = await Subjects.find({ block_id }).lean()
 
-  let totalWeightages = subjects.reduce((acc, subject) => acc + subject.weightage, 0);
-  totalWeightages = Number((totalWeightages + incomingWeightage).toFixed(2));
+  let totalWeightages = subjects.reduce((acc, subject) => acc + subject.weightage, 0)
+  totalWeightages = Number((totalWeightages + incomingWeightage).toFixed(2))
 
   if (totalWeightages > 100) {
-    throw new AppError('Subject weightage exceeds 100', 'WEIGHTAGE_LIMIT_EXCEEDED', 400);
+    throw new AppError('Subject weightage exceeds 100', 'WEIGHTAGE_LIMIT_EXCEEDED', 400)
   }
-};
+}
 
 /**
  * Validates accumulated test weightages under a specific subject boundary.
@@ -304,15 +305,15 @@ const ValidateSubjectWeightage = async (block_id, incomingWeightage) => {
  * @throws {AppError} 400 if aggregate weight breaches 100% threshold
  */
 const ValidateTestWeightage = async (subject_id, incomingWeightage) => {
-  const tests = await Tests.find({ subject_id }).lean();
+  const tests = await Tests.find({ subject_id }).lean()
 
-  let totalWeightages = tests.reduce((acc, test) => acc + test.weightage, 0);
-  totalWeightages = Number((totalWeightages + incomingWeightage).toFixed(2));
+  let totalWeightages = tests.reduce((acc, test) => acc + test.weightage, 0)
+  totalWeightages = Number((totalWeightages + incomingWeightage).toFixed(2))
 
   if (totalWeightages > 100) {
-    throw new AppError('Test weightage exceeds 100', 'WEIGHTAGE_LIMIT_EXCEEDED', 400);
+    throw new AppError('Test weightage exceeds 100', 'WEIGHTAGE_LIMIT_EXCEEDED', 400)
   }
-};
+}
 
 /**
  * Evaluates entity immutability state based on persistent transactional records.
@@ -320,13 +321,13 @@ const ValidateTestWeightage = async (subject_id, incomingWeightage) => {
  * @throws {AppError} 409 if active data prevents structural modifications
  */
 const checkEntityLock = async (entity_id) => {
-  const StudentGrades = mongoose.connection.collection('student_grades');
-  const existing = await StudentGrades.findOne({ entity_id });
+  const StudentGrades = mongoose.connection.collection('student_grades')
+  const existing = await StudentGrades.findOne({ entity_id })
 
   if (existing) {
-    throw new AppError('Entity is locked due to existing grades', 'ENTITY_LOCKED_GRADES_EXIST', 409);
+    throw new AppError('Entity is locked due to existing grades', 'ENTITY_LOCKED_GRADES_EXIST', 409)
   }
-};
+}
 
 // *************** EXPORT MODULE ***************
 export {
@@ -341,5 +342,5 @@ export {
   UpdateTestHelper,
   DeleteTestHelper,
   ValidateSubjectWeightage,
-  ValidateTestWeightage,
-};
+  ValidateTestWeightage
+}

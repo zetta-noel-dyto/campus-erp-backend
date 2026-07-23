@@ -1,9 +1,9 @@
 // *************** IMPORT LIBRARY ***************
-import DataLoader from 'dataloader';
-import mongoose from 'mongoose';
+import DataLoader from 'dataloader'
+import mongoose from 'mongoose'
 
 // *************** IMPORT MODULE ***************
-import { AcademicYearModel } from '../features/academic/enrollment/academic_year.model.js';
+import { AcademicYearModel } from '../features/academic/enrollment/academic_year.model.js'
 
 /**
  * Batch function for DataLoader to resolve AcademicYear documents.
@@ -15,25 +15,26 @@ import { AcademicYearModel } from '../features/academic/enrollment/academic_year
  */
 const batchAcademicYears = async (keys) => {
   // *************** START: Deduplicate and normalize keys ***************
-  const uniqueKeys = [...new Set(keys.map((key) => String(key)))].map((id) => new mongoose.Types.ObjectId(id));
+  const uniqueKeys = [...new Set(keys.map((key) => String(key)))].map(
+    (id) => new mongoose.Types.ObjectId(id)
+  )
   // *************** END: Deduplicate and normalize keys ***************
 
   // *************** START: Fetch academic years in single query ***************
-  const academicYears = await AcademicYearModel.find({ _id: { $in: uniqueKeys } }).lean();
+  const academicYears = await AcademicYearModel.find({ _id: { $in: uniqueKeys } }).lean()
   // *************** END: Fetch academic years in single query ***************
 
   // *************** START: Map results for O(1) lookup ***************
-  const academicYearsMap = new Map();
-
+  const academicYearsMap = new Map()
   academicYears.forEach((academicYear) => {
-    academicYearsMap.set(String(academicYear._id), academicYear);
-  });
+    academicYearsMap.set(String(academicYear._id), academicYear)
+  })
   // *************** END: Map results for O(1) lookup ***************
 
   // *************** START: Maintain input order consistency ***************
-  return keys.map((id) => academicYearsMap.get(String(id)) ?? null);
+  return keys.map((id) => academicYearsMap.get(String(id)) ?? null)
   // *************** END: Maintain input order consistency ***************
-};
+}
 
 /**
  * Creates a new DataLoader instance for AcademicYear batching.
@@ -42,8 +43,8 @@ const batchAcademicYears = async (keys) => {
  * @returns {DataLoader} New isolated DataLoader instance
  */
 const CreateAcademicYearLoader = () => {
-  return new DataLoader(batchAcademicYears);
-};
+  return new DataLoader(batchAcademicYears)
+}
 
 // *************** EXPORT MODULE ***************
-export { CreateAcademicYearLoader };
+export { CreateAcademicYearLoader }

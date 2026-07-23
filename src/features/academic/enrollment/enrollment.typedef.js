@@ -1,5 +1,4 @@
 // *************** GLOBAL VARIABLES ***************
-// GraphQL schema definition for AcademicYear domain including enrollment mutation
 const typeDefs = `#graphql
 # *************** OBJECT TYPES ***************
 type AcademicYear {
@@ -22,7 +21,7 @@ input EnrollStudentInput {
 type Mutation {
     EnrollStudentsToYear(input: EnrollStudentInput!): AcademicYear! @auth(requires: admin)
 }
-`;
+`
 
 // *************** EXPORT MODULE ***************
-export { typeDefs };
+export { typeDefs }

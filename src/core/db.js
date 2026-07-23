@@ -1,27 +1,23 @@
 // *************** IMPORT LIBRARY ***************
-import mongoose from 'mongoose';
+import mongoose from 'mongoose'
 
 // *************** IMPORT MODULE ***************
-import { AppError } from './error.js';
-import { db } from './config.js';
+import { AppError } from './error.js'
+import { db } from './config.js'
 
 // *************** GLOBAL VARIABLES ***************
-// Mongoose global connection instance used for lifecycle monitoring
-const connection = mongoose.connection;
+const connection = mongoose.connection
 
 // *************** CONNECTION EVENT HANDLERS ***************
-// Fired when MongoDB connection is successfully established
 connection.on('open', () => {
-  console.log('Database connected');
-});
+  console.log('Database connected')
+})
 
-// Fired when MongoDB connection encounters runtime errors
 connection.on('error', async (error) => {
-  console.error('Database error:', error);
-  // Ensures clean shutdown if database connection becomes unstable
-  await mongoose.disconnect();
-  process.exit(1);
-});
+  console.error('Database error:', error)
+  await mongoose.disconnect()
+  process.exit(1)
+})
 
 // *************** DATABASE CONNECTION ***************
 /**
@@ -35,11 +31,11 @@ connection.on('error', async (error) => {
  */
 const ConnectDB = async () => {
   try {
-    await mongoose.connect(db.uri);
+    await mongoose.connect(db.uri)
   } catch (error) {
-    throw new AppError(`Database error : ${error}`, 'DATABASE_ERROR', 500);
+    throw new AppError(`Database error : ${error}`, 'DATABASE_ERROR', 500)
   }
-};
+}
 
 // *************** EXPORT MODULE ***************
-export { ConnectDB };
+export { ConnectDB }

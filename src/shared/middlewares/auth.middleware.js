@@ -1,9 +1,9 @@
 // *************** IMPORT LIBRARY ***************
-import jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken'
 
 // *************** IMPORT MODULE ***************
-import { AppError } from '../../core/error.js';
-import { jwtKey } from '../../core/config.js';
+import { AppError } from '../../core/error.js'
+import { jwtKey } from '../../core/config.js'
 
 // *************** MIDDLEWARES ***************
 /**
@@ -15,26 +15,26 @@ import { jwtKey } from '../../core/config.js';
  */
 const AuthMiddleware = (req, res, next) => {
   // *************** START: Extract authorization token ***************
-  const header = req.headers.authorization;
+  const header = req.headers.authorization
   if (!header || !header.startsWith('Bearer ')) {
-    req.user = undefined;
-    return next();
+    req.user = undefined
+    return next()
   }
 
-  const token = header.split(' ')[1];
+  const token = header.split(' ')[1]
   // *************** END: Extract authorization token ***************
 
   // *************** START: Verify JWT token ***************
   try {
-    const decoded = jwt.verify(token, jwtKey.secret);
-    req.user = decoded;
+    const decoded = jwt.verify(token, jwtKey.secret)
+    req.user = decoded
   } catch (error) {
-    req.user = undefined;
+    req.user = undefined
   }
   // *************** END: Verify JWT token ***************
 
-  return next();
-};
+  return next()
+}
 
 /**
  * Ensures incoming request is authenticated before accessing protected REST endpoints.
@@ -45,25 +45,24 @@ const AuthMiddleware = (req, res, next) => {
  */
 const RequiredAuthMiddleware = (req, res, next) => {
   // *************** START: Validate authorization header ***************
-  const header = req.headers.authorization;
+  const header = req.headers.authorization
   if (!header || !header.startsWith('Bearer ')) {
-    return next(new AppError('Authentication required', 'UNAUTHORIZED', 401));
+    return next(new AppError('Authentication required', 'UNAUTHORIZED', 401))
   }
 
-  const token = header.split(' ')[1];
+  const token = header.split(' ')[1]
   // *************** END: Validate authorization header ***************
 
   // *************** START: Verify authentication token ***************
   try {
-    req.user = jwt.verify(token, jwtKey.secret);
-    return next();
+    req.user = jwt.verify(token, jwtKey.secret)
+    return next()
   } catch (error) {
-    return next(new AppError('Invalid authentication token', 'UNAUTHORIZED', 401));
+    return next(new AppError('Invalid authentication token', 'UNAUTHORIZED', 401))
   }
   // *************** END: Verify authentication token ***************
-};
+}
 
-// *************** MIDDLEWARE ***************
 /**
  * Creates role-based authorization middleware for protected REST endpoints.
  * @param {Array<string>} roles - Collection of roles permitted to access the target resource.
@@ -72,18 +71,18 @@ const RequiredAuthMiddleware = (req, res, next) => {
 const AuthorizeRoles = (roles) => (req, res, next) => {
   // *************** START: Validate authenticated user ***************
   if (!req.user) {
-    return next(new AppError('Authentication required', 'UNAUTHORIZED', 401));
+    return next(new AppError('Authentication required', 'UNAUTHORIZED', 401))
   }
   // *************** END: Validate authenticated user ***************
 
   // *************** START: Validate user authorization ***************
   if (!roles.includes(req.user.role)) {
-    return next(new AppError('Access denied', 'FORBIDDEN', 403));
+    return next(new AppError('Access denied', 'FORBIDDEN', 403))
   }
   // *************** END: Validate user authorization ***************
 
-  return next();
-};
+  return next()
+}
 
 // *************** EXPORT MODULE ***************
-export { AuthMiddleware, AuthorizeRoles, RequiredAuthMiddleware };
+export { AuthMiddleware, AuthorizeRoles, RequiredAuthMiddleware }

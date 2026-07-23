@@ -1,8 +1,8 @@
 // *************** IMPORT MODULE ***************
-import { LoginHelper } from './auth.helper.js';
-import { LoginSchema } from './auth.validator.js';
-import { NormalizeGqlError } from '../../../core/error.js';
-import { ValidateInput } from '../../../shared/validators/input.validators.js';
+import { LoginHelper } from './auth.helper.js'
+import { LoginSchema } from './auth.validator.js'
+import { NormalizeGqlError } from '../../../core/error.js'
+import { ValidateInput } from '../../../shared/validators/input.validators.js'
 
 // *************** MUTATION ***************
 /**
@@ -16,23 +16,22 @@ import { ValidateInput } from '../../../shared/validators/input.validators.js';
 const Login = async (_, { input }) => {
   try {
     // *************** START: Validate login payload ***************
-    const data = ValidateInput(LoginSchema, input);
+    const data = ValidateInput(LoginSchema, input)
     // *************** END: Validate login payload ***************
 
     // *************** START: Authenticate user ***************
-    return await LoginHelper(data);
+    return await LoginHelper(data)
     // *************** END: Authenticate user ***************
   } catch (error) {
-    // *************** Normalize authentication error response ***************
-    throw NormalizeGqlError(error);
+    throw NormalizeGqlError(error)
   }
-};
+}
 
 // *************** EXPORT MODULE ***************
 const resolver = {
   Mutation: {
-    Login,
-  },
-};
+    Login
+  }
+}
 
-export { resolver };
+export { resolver }

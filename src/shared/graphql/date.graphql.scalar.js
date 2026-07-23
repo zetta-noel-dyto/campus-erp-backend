@@ -1,5 +1,5 @@
 // *************** IMPORT LIBRARY ***************
-import { GraphQLScalarType, Kind } from 'graphql';
+import { GraphQLScalarType, Kind } from 'graphql'
 
 // *************** CUSTOM SCALAR ***************
 /**
@@ -11,19 +11,19 @@ const DateScalar = new GraphQLScalarType({
   description: 'Custom date type',
   serialize: (value) => new Date(value).toISOString(),
   parseValue: (value) => {
-    const date = new Date(value);
-    if (isNaN(date.getTime())) return null;
+    const date = new Date(value)
+    if (isNaN(date.getTime())) return null
 
-    return date;
+    return date
   },
   parseLiteral: (ast) => {
-    if (ast.kind !== Kind.STRING) return null;
-    const date = new Date(ast.value);
-    if (isNaN(date.getTime())) return null;
+    if (ast.kind !== Kind.STRING) return null
+    const date = new Date(ast.value)
+    if (isNaN(date.getTime())) return null
 
-    return date;
-  },
-});
+    return date
+  }
+})
 
 // *************** EXPORT MODULE ***************
-export { DateScalar };
+export { DateScalar }

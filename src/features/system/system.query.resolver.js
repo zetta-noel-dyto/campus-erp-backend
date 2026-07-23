@@ -2,10 +2,10 @@
 const resolver = {
   Query: {
     ping: () => {
-      return 'pong';
-    },
-  },
-};
+      return 'pong'
+    }
+  }
+}
 
 // *************** EXPORT MODULE ***************
-export { resolver };
+export { resolver }

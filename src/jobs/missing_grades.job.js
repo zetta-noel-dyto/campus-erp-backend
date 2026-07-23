@@ -1,53 +1,53 @@
 // *************** IMPORT LIBRARY ***************
-import nodeCron from 'node-cron';
+import nodeCron from 'node-cron'
 
 // *************** IMPORT MODULE ***************
-import { AcademicYearModel as AcademicYears } from '../features/academic/enrollment/academic_year.model.js';
-import { AppError } from '../core/error.js';
-import { NotificationLogModel } from '../features/system/notifications/notification_log.model.js';
-import { SendEmail } from '../shared/services/email.service.js';
-import { StudentModel as Students } from '../features/users/student/student.model.js';
-import { TestModel as Tests } from '../features/academic/curriculum/curriculum.model.js';
-import { UserModel as Users } from '../features/users/user/user.model.js';
+import { AcademicYearModel as AcademicYears } from '../features/academic/enrollment/academic_year.model.js'
+import { AppError } from '../core/error.js'
+import { NotificationLogModel } from '../features/system/notifications/notification_log.model.js'
+import { SendEmail } from '../shared/services/email.service.js'
+import { StudentModel as Students } from '../features/users/student/student.model.js'
+import { TestModel as Tests } from '../features/academic/curriculum/curriculum.model.js'
+import { UserModel as Users } from '../features/users/user/user.model.js'
 
 // *************** AGGREGATION PIPELINE ***************
 const aggregation = [
-  // Filter only active academic years for auditing.
+  // Filter only active academic years for auditing
   { $match: { status: 'active' } },
-  // Expand student references to validate each student's grade completion.
+  // Expand student references to validate each student's grade completion
   { $unwind: '$student_ids' },
-  // Expand block references to locate related subjects and tests.
+  // Expand block references to locate related subjects and tests
   { $unwind: '$block_ids' },
-  // Retrieve subjects associated with the academic block.
+  // Retrieve subjects associated with the academic block
   {
     $lookup: {
       from: 'subjects',
       localField: 'block_ids',
       foreignField: 'block_id',
-      as: 'subjects',
-    },
+      as: 'subjects'
+    }
   },
-  // Convert subject array result into individual subject documents.
+  // Convert subject array result into individual subject documents
   { $unwind: '$subjects' },
-  // Retrieve tests associated with each subject.
+  // Retrieve tests associated with each subject
   {
     $lookup: {
       from: 'tests',
       localField: 'subjects._id',
       foreignField: 'subject_id',
-      as: 'tests',
-    },
+      as: 'tests'
+    }
   },
-  // Convert test array result into individual test documents.
+  // Convert test array result into individual test documents
   { $unwind: '$tests' },
-  // Check whether a grade record already exists for student, test, and academic year combination.
+  // Check whether a grade record already exists for student, test, and academic year combination
   {
     $lookup: {
       from: 'studentgrades',
       let: {
         studentId: '$student_ids',
         testId: '$tests._id',
-        academicYearId: '$_id',
+        academicYearId: '$_id'
       },
       pipeline: [
         {
@@ -56,30 +56,30 @@ const aggregation = [
               $and: [
                 { $eq: ['$student_id', '$$studentId'] },
                 { $eq: ['$test_id', '$$testId'] },
-                { $eq: ['$academic_year_id', '$$academicYearId'] },
-              ],
-            },
-          },
-        },
+                { $eq: ['$academic_year_id', '$$academicYearId'] }
+              ]
+            }
+          }
+        }
       ],
-      as: 'grades',
-    },
+      as: 'grades'
+    }
   },
-  // Keep only records where no grade has been submitted.
+  // Keep only records where no grade has been submitted
   {
     $match: {
-      grades: { $size: 0 },
-    },
+      grades: { $size: 0 }
+    }
   },
-  // Return only required identifiers for notification processing.
+  // Return only required identifiers for notification processing
   {
     $project: {
       student_id: '$student_ids',
       test_id: '$tests._id',
-      academic_year_id: '$_id',
-    },
-  },
-];
+      academic_year_id: '$_id'
+    }
+  }
+]
 
 // *************** HELPER ***************
 /**
@@ -87,7 +87,7 @@ const aggregation = [
  * @param {number} ms - Delay duration in milliseconds.
  * @returns {Promise<void>} Promise resolved after the delay duration.
  */
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 // *************** JOB ***************
 /**
@@ -96,28 +96,32 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
  */
 const MissingGradeAuditorJob = async () => {
   // *************** START: Find missing grade records ***************
-  const results = await AcademicYears.aggregate(aggregation);
-  if (!results.length) return;
+  const results = await AcademicYears.aggregate(aggregation)
+  if (!results.length) return
   // *************** END: Find missing grade records ***************
 
-  const teacher = await Users.findOne({ role: 'teacher' }).lean();
+  const teacher = await Users.findOne({ role: 'teacher' }).lean()
   if (!teacher || !teacher.email) {
-    throw new AppError('The requested teacher does not exist or has incomplete information', 'TEACHER_NOT_FOUND_OR_INVALID', 404);
+    throw new AppError(
+      'The requested teacher does not exist or has incomplete information',
+      'TEACHER_NOT_FOUND_OR_INVALID',
+      404
+    )
   }
 
   // *************** START: Prepare related data lookup ***************
-  const studentIds = results.map((result) => result.student_id);
-  const testIds = results.map((result) => result.test_id);
+  const studentIds = results.map((result) => result.student_id)
+  const testIds = results.map((result) => result.test_id)
 
   const students = await Students.find({ _id: { $in: studentIds } })
     .select('first_name last_name student_number')
-    .lean();
+    .lean()
   const tests = await Tests.find({ _id: { $in: testIds } })
     .select('name')
-    .lean();
+    .lean()
 
-  const studentMap = new Map(students.map((student) => [String(student._id), student]));
-  const testMap = new Map(tests.map((test) => [String(test._id), test]));
+  const studentMap = new Map(students.map((student) => [String(student._id), student]))
+  const testMap = new Map(tests.map((test) => [String(test._id), test]))
   // *************** END: Prepare related data lookup ***************
 
   // *************** START: Process missing grade notifications ***************
@@ -125,12 +129,12 @@ const MissingGradeAuditorJob = async () => {
     const exist = await NotificationLogModel.findOne({
       type: 'MISSING_GRADE_ALERT',
       student_id: result.student_id,
-      test_id: result.test_id,
-    }).lean();
-    if (exist) continue;
+      test_id: result.test_id
+    }).lean()
+    if (exist) continue
 
-    const student = studentMap.get(String(result.student_id));
-    const test = testMap.get(String(result.test_id));
+    const student = studentMap.get(String(result.student_id))
+    const test = testMap.get(String(result.test_id))
 
     const html = `
       <h3>Missing Grade Alert</h3>
@@ -138,19 +142,19 @@ const MissingGradeAuditorJob = async () => {
         Student ${student.first_name} ${student.last_name} with student number ${student.student_number}
         is missing grade for test ${test.name}
       </p>
-    `;
+    `
 
-    await SendEmail(teacher.email, 'Missing Grade Alert', html);
+    await SendEmail(teacher.email, 'Missing Grade Alert', html)
     await NotificationLogModel.create({
       type: 'MISSING_GRADE_ALERT',
       student_id: result.student_id,
       test_id: result.test_id,
-      academic_year_id: result.academic_year_id,
-    });
-    await delay(11_000);
+      academic_year_id: result.academic_year_id
+    })
+    await delay(11_000)
   }
   // *************** END: Process missing grade notifications ***************
-};
+}
 
 // *************** JOB INITIALIZER ***************
 /**
@@ -160,12 +164,12 @@ const MissingGradeAuditorJob = async () => {
 const InitializeGradeAuditorJob = () => {
   nodeCron.schedule('* * * * *', async () => {
     try {
-      await MissingGradeAuditorJob();
+      await MissingGradeAuditorJob()
     } catch (error) {
-      console.error('Error executing grade auditor job', error);
+      console.error('Error executing grade auditor job', error)
     }
-  });
-};
+  })
+}
 
 // *************** EXPORT MODULE ***************
-export { InitializeGradeAuditorJob };
+export { InitializeGradeAuditorJob }

@@ -1,11 +1,11 @@
 // *************** IMPORT LIBRARY ***************
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
 
 // *************** IMPORT MODULE ***************
-import { AppError } from '../../../core/error.js';
-import { jwtKey } from '../../../core/config.js';
-import { UserModel as Users } from '../user/user.model.js';
+import { AppError } from '../../../core/error.js'
+import { jwtKey } from '../../../core/config.js'
+import { UserModel as Users } from '../user/user.model.js'
 
 // *************** HELPER FUNCTION ***************
 /**
@@ -18,30 +18,23 @@ import { UserModel as Users } from '../user/user.model.js';
  */
 const LoginHelper = async (input) => {
   // *************** START: Fetch user account ***************
-  // Retrieve user data by email while converting the document into a plain object.
-  const user = await Users.findOne({ email: input.email }).lean();
-
-  // Reject authentication when no account matches the provided email.
+  const user = await Users.findOne({ email: input.email }).lean()
   if (!user) {
-    throw new AppError('Invalid email or password', 'UNAUTHORIZED', 401);
+    throw new AppError('Invalid email or password', 'UNAUTHORIZED', 401)
   }
   // *************** END: Fetch user account ***************
 
   // *************** START: Validate user password ***************
-  // Compare provided password with the hashed password stored in the database.
-  const comparePassword = await bcrypt.compare(input.password, user.password);
-
-  // Reject authentication when password verification fails.
+  const comparePassword = await bcrypt.compare(input.password, user.password)
   if (!comparePassword) {
-    throw new AppError('Invalid email or password', 'UNAUTHORIZED', 401);
+    throw new AppError('Invalid email or password', 'UNAUTHORIZED', 401)
   }
   // *************** END: Validate user password ***************
 
   // *************** START: Generate authentication token ***************
-  // Create JWT token containing user identity and role information for future authorization checks.
-  return jwt.sign({ userId: user._id, role: user.role }, jwtKey.secret, { expiresIn: '8h' });
+  return jwt.sign({ userId: user._id, role: user.role }, jwtKey.secret, { expiresIn: '8h' })
   // *************** END: Generate authentication token ***************
-};
+}
 
 // *************** EXPORT MODULE ***************
-export { LoginHelper };
+export { LoginHelper }

@@ -1,5 +1,5 @@
 // *************** IMPORT LIBRARY ***************
-import { GraphQLError } from 'graphql';
+import { GraphQLError } from 'graphql'
 
 /**
  * Validates payload structures against Joi schemas and maps errors to GraphQLError format.
@@ -13,26 +13,26 @@ const ValidateInput = (schema, payload, context = 'Validation') => {
   const { error, value } = schema.validate(payload, {
     abortEarly: false,
     stripUnknown: true,
-    convert: true,
-  });
+    convert: true
+  })
 
   if (error) {
     const errors = error.details.map((detail) => ({
       field: detail.path.join('.'),
-      message: detail.message,
-    }));
+      message: detail.message
+    }))
 
     throw new GraphQLError('Validation failed', {
       extensions: {
         code: 'INVALID_INPUT',
         http: { status: 400 },
         context,
-        errors,
-      },
-    });
+        errors
+      }
+    })
   }
 
-  return value;
-};
+  return value
+}
 
-export { ValidateInput };
+export { ValidateInput }

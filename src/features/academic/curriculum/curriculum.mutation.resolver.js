@@ -1,5 +1,9 @@
 // *************** IMPORT MODULE ***************
-import { BlockModel as Blocks, SubjectModel as Subjects, TestModel as Tests } from './curriculum.model.js';
+import {
+  BlockModel as Blocks,
+  SubjectModel as Subjects,
+  TestModel as Tests
+} from './curriculum.model.js'
 import {
   checkEntityLock,
   CreateBlockHelper,
@@ -12,18 +16,18 @@ import {
   UpdateSubjectHelper,
   UpdateTestHelper,
   ValidateSubjectWeightage,
-  ValidateTestWeightage,
-} from './curriculum.helper.js';
+  ValidateTestWeightage
+} from './curriculum.helper.js'
 import {
   CreateBlockSchema,
   CreateSubjectSchema,
   CreateTestSchema,
   UpdateBlockSchema,
   UpdateSubjectSchema,
-  UpdateTestSchema,
-} from './curriculum.validator.js';
-import { NormalizeGqlError } from '../../../core/error.js';
-import { ValidateInput } from '../../../shared/validators/input.validators.js';
+  UpdateTestSchema
+} from './curriculum.validator.js'
+import { NormalizeGqlError } from '../../../core/error.js'
+import { ValidateInput } from '../../../shared/validators/input.validators.js'
 
 // *************** BLOCK RESOLVERS ***************
 /**
@@ -36,12 +40,12 @@ import { ValidateInput } from '../../../shared/validators/input.validators.js';
  */
 const CreateBlock = async (_, { input }) => {
   try {
-    const data = ValidateInput(CreateBlockSchema, input);
-    return await CreateBlockHelper(data);
+    const data = ValidateInput(CreateBlockSchema, input)
+    return await CreateBlockHelper(data)
   } catch (error) {
-    throw NormalizeGqlError(error);
+    throw NormalizeGqlError(error)
   }
-};
+}
 
 /**
  * Updates an un-locked academic block using partial adjustments via helper.
@@ -54,13 +58,13 @@ const CreateBlock = async (_, { input }) => {
  */
 const UpdateBlock = async (_, { id, input }) => {
   try {
-    await checkEntityLock(id);
-    const data = ValidateInput(UpdateBlockSchema, input);
-    return await UpdateBlockHelper(id, data);
+    await checkEntityLock(id)
+    const data = ValidateInput(UpdateBlockSchema, input)
+    return await UpdateBlockHelper(id, data)
   } catch (error) {
-    throw NormalizeGqlError(error);
+    throw NormalizeGqlError(error)
   }
-};
+}
 
 /**
  * Destroys a chosen academic block using strict relational checks via helper.
@@ -72,12 +76,12 @@ const UpdateBlock = async (_, { id, input }) => {
  */
 const DeleteBlock = async (_, { id }) => {
   try {
-    await checkEntityLock(id);
-    return await DeleteBlockHelper(id);
+    await checkEntityLock(id)
+    return await DeleteBlockHelper(id)
   } catch (error) {
-    throw NormalizeGqlError(error);
+    throw NormalizeGqlError(error)
   }
-};
+}
 
 // *************** SUBJECT RESOLVERS ***************
 /**
@@ -90,13 +94,13 @@ const DeleteBlock = async (_, { id }) => {
  */
 const CreateSubject = async (_, { input }) => {
   try {
-    const data = ValidateInput(CreateSubjectSchema, input);
-    await ValidateSubjectWeightage(data.block_id, data.weightage);
-    return await CreateSubjectHelper(data);
+    const data = ValidateInput(CreateSubjectSchema, input)
+    await ValidateSubjectWeightage(data.block_id, data.weightage)
+    return await CreateSubjectHelper(data)
   } catch (error) {
-    throw NormalizeGqlError(error);
+    throw NormalizeGqlError(error)
   }
-};
+}
 
 /**
  * Modifies structural components on a designated unlocked subject via helper.
@@ -109,13 +113,13 @@ const CreateSubject = async (_, { input }) => {
  */
 const UpdateSubject = async (_, { id, input }) => {
   try {
-    await checkEntityLock(id);
-    const data = ValidateInput(UpdateSubjectSchema, input);
-    return await UpdateSubjectHelper(id, data);
+    await checkEntityLock(id)
+    const data = ValidateInput(UpdateSubjectSchema, input)
+    return await UpdateSubjectHelper(id, data)
   } catch (error) {
-    throw NormalizeGqlError(error);
+    throw NormalizeGqlError(error)
   }
-};
+}
 
 /**
  * Purges an individual subject descriptor from database persistence via helper.
@@ -127,12 +131,12 @@ const UpdateSubject = async (_, { id, input }) => {
  */
 const DeleteSubject = async (_, { id }) => {
   try {
-    await checkEntityLock(id);
-    return await DeleteSubjectHelper(id);
+    await checkEntityLock(id)
+    return await DeleteSubjectHelper(id)
   } catch (error) {
-    throw NormalizeGqlError(error);
+    throw NormalizeGqlError(error)
   }
-};
+}
 
 // *************** TEST RESOLVERS ***************
 /**
@@ -145,13 +149,13 @@ const DeleteSubject = async (_, { id }) => {
  */
 const CreateTest = async (_, { input }) => {
   try {
-    const data = ValidateInput(CreateTestSchema, input);
-    await ValidateTestWeightage(data.subject_id, data.weightage);
-    return await CreateTestHelper(data);
+    const data = ValidateInput(CreateTestSchema, input)
+    await ValidateTestWeightage(data.subject_id, data.weightage)
+    return await CreateTestHelper(data)
   } catch (error) {
-    throw NormalizeGqlError(error);
+    throw NormalizeGqlError(error)
   }
-};
+}
 
 /**
  * Overwrites specific parameters on an un-locked test descriptor document.
@@ -164,13 +168,13 @@ const CreateTest = async (_, { input }) => {
  */
 const UpdateTest = async (_, { id, input }) => {
   try {
-    await checkEntityLock(id);
-    const data = ValidateInput(UpdateTestSchema, input);
-    return await UpdateTestHelper(id, data);
+    await checkEntityLock(id)
+    const data = ValidateInput(UpdateTestSchema, input)
+    return await UpdateTestHelper(id, data)
   } catch (error) {
-    throw NormalizeGqlError(error);
+    throw NormalizeGqlError(error)
   }
-};
+}
 
 /**
  * Removes an individual test item using verification protocols via helper.
@@ -182,12 +186,12 @@ const UpdateTest = async (_, { id, input }) => {
  */
 const DeleteTest = async (_, { id }) => {
   try {
-    await checkEntityLock(id);
-    return await DeleteTestHelper(id);
+    await checkEntityLock(id)
+    return await DeleteTestHelper(id)
   } catch (error) {
-    throw NormalizeGqlError(error);
+    throw NormalizeGqlError(error)
   }
-};
+}
 
 // *************** GRAPHQL RESOLVERS ***************
 const resolver = {
@@ -200,9 +204,9 @@ const resolver = {
     DeleteSubject,
     CreateTest,
     UpdateTest,
-    DeleteTest,
-  },
-};
+    DeleteTest
+  }
+}
 
 // *************** EXPORT MODULE ***************
-export { resolver };
+export { resolver }

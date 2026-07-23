@@ -1,25 +1,19 @@
 // *************** IMPORT LIBRARY ***************
-import nodemailer from 'nodemailer';
+import nodemailer from 'nodemailer'
 
 // *************** IMPORT MODULE ***************
-import { email, smtp } from '../../core/config.js';
+import { email, smtp } from '../../core/config.js'
 
 // *************** GLOBAL VARIABLES ***************
 const transporter = nodemailer.createTransport({
-  // SMTP server hostname used for email delivery connection.
   host: smtp.host,
-  // SMTP server port used for SMTP communication.
   port: smtp.port,
-  // Disable secure connection because SMTP transport uses non-SSL configuration.
   secure: false,
-  // Authentication credentials used to connect to SMTP server.
   auth: {
-    // SMTP account username.
     user: smtp.user,
-    // SMTP account password.
-    pass: smtp.pass,
-  },
-});
+    pass: smtp.pass
+  }
+})
 
 // *************** HELPER FUNCTION ***************
 /**
@@ -35,10 +29,10 @@ const SendEmail = async (to, subject, htmlBody) => {
     from: email.admin,
     to,
     subject,
-    html: htmlBody,
-  });
+    html: htmlBody
+  })
   // *************** END: Send email notification ***************
-};
+}
 
 // *************** EXPORT MODULE ***************
-export { SendEmail };
+export { SendEmail }

@@ -1,12 +1,12 @@
 // *************** IMPORT LIBRARY ***************
-import puppeteer from 'puppeteer';
-import { Readable } from 'stream';
+import puppeteer from 'puppeteer'
+import { Readable } from 'stream'
 
 // *************** IMPORT MODULE ***************
-import { AppError } from '../../core/error.js';
+import { AppError } from '../../core/error.js'
 
 // *************** GLOBAL VARIABLES ***************
-let browserInstance = null;
+let browserInstance = null
 
 // *************** SERVICE INITIALIZATION ***************
 /**
@@ -15,13 +15,12 @@ let browserInstance = null;
  */
 const InitializePDFService = async () => {
   // *************** START: Initialize browser instance ***************
-  if (browserInstance) return;
-
+  if (browserInstance) return
   browserInstance = await puppeteer.launch({
-    headless: true,
-  });
+    headless: true
+  })
   // *************** END: Initialize browser instance ***************
-};
+}
 
 // *************** PDF GENERATION ***************
 /**
@@ -33,49 +32,48 @@ const InitializePDFService = async () => {
 const GeneratePDFStream = async (htmlContent) => {
   // *************** START: Validate PDF service availability ***************
   if (!browserInstance) {
-    throw new AppError('PDF service is not initialized', 'PDF_SERVICE_NOT_INITIALIZED', 500);
+    throw new AppError('PDF service is not initialized', 'PDF_SERVICE_NOT_INITIALIZED', 500)
   }
   // *************** END: Validate PDF service availability ***************
 
-  let page = null;
-
+  let page = null
   try {
     // *************** START: Create PDF page ***************
-    page = await browserInstance.newPage();
+    page = await browserInstance.newPage()
     await page.setContent(htmlContent, {
-      waitUntil: 'networkidle0',
-    });
+      waitUntil: 'networkidle0'
+    })
     // *************** END: Create PDF page ***************
 
     // *************** START: Generate PDF stream ***************
     const webStream = await page.createPDFStream({
       format: 'A4',
-      printBackground: true,
-    });
-    const pdfStream = Readable.fromWeb(webStream);
+      printBackground: true
+    })
+    const pdfStream = Readable.fromWeb(webStream)
 
     const closePage = async () => {
-      if (!page) return;
-      const currentPage = page;
-      page = null;
-      await currentPage.close();
-    };
+      if (!page) return
+      const currentPage = page
+      page = null
+      await currentPage.close()
+    }
 
-    pdfStream.on('end', closePage);
-    pdfStream.on('error', closePage);
-    pdfStream.on('close', closePage);
+    pdfStream.on('end', closePage)
+    pdfStream.on('error', closePage)
+    pdfStream.on('close', closePage)
     // *************** END: Generate PDF stream ***************
 
-    return pdfStream;
+    return pdfStream
   } catch (error) {
     // *************** START: Handle PDF generation failure ***************
-    if (page) await page.close();
-    console.error(error);
+    if (page) await page.close()
+    console.error(error)
 
-    throw new AppError(`Failed to generate PDF : ${error.message}`, 'PDF_GENERATION_FAILED', 500);
+    throw new AppError(`Failed to generate PDF : ${error.message}`, 'PDF_GENERATION_FAILED', 500)
     // *************** END: Handle PDF generation failure ***************
   }
-};
+}
 
 // *************** EXPORT MODULE ***************
-export { InitializePDFService, GeneratePDFStream };
+export { InitializePDFService, GeneratePDFStream }
